@@ -9,14 +9,7 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Explicitly Ignored Project Files & Folders
+# Heavy Datasets & Model Cache
 Dataset/
 ISL english Dataset/
 maitree model/
-important.md
-SignBridge_India_MVP_PRD.md
-SignBridge_India_Phase_Structure.md
-SignBridge_India_Repo_Structure.md
-docs/
-phases/
-Phases/
