@@ -17,20 +17,17 @@ not understand ISL, particularly at essential public-service touchpoints
 such as hospitals, government offices, banks, schools and other service
 institutions.
 
-The MVP focuses on a practical communication bridge:
+The MVP focuses on a practical two-way communication bridge:
 
-**ISL gesture → Computer Vision → Initial CNN-based recognition →
-Confidence score → Sequence construction → AI language processing →
-English / Hindi / Marathi text**
+**Direction A: ISL → Text (Primary)**
+ISL gesture → Computer Vision → Initial CNN-based recognition → Confidence score → Sequence construction → AI language processing → English / Hindi / Marathi text
 
-The wider platform extends beyond the recognition engine with ISL
-learning and practice, QR-based service access, institutional
-dashboards, assessment/certification and readiness monitoring.
+**Direction B: Text → ISL Avatar (Reverse)**
+Non-ISL User → Types message / selects predefined phrase → Language Processing → Supported ISL phrase mapping → Animated ISL Avatar → ISL User
 
-The MVP intentionally uses a defined and validated set of supported ISL
-sign/character classes. It does not claim unrestricted continuous ISL
-translation, complete ISL vocabulary recognition, or full two-way
-communication.
+The wider platform extends beyond the recognition engine with ISL learning and practice, QR-based service access, institutional dashboards, assessment/certification and readiness monitoring.
+
+The MVP intentionally uses a defined and validated set of supported ISL sign/character classes and predefined healthcare phrases. It does not claim unrestricted continuous ISL translation, complete 10,000+ ISL vocabulary recognition, or unrestricted free-form natural language to continuous 3D ISL avatar generation.
 
 ## 2. Problem
 
@@ -65,28 +62,29 @@ The MVP must:
 
 - Capture ISL gestures through a camera.
 - Process input through computer vision.
-- Recognise a defined and validated set of supported ISL
-  signs/characters.
+- Recognise a defined and validated set of supported ISL signs/characters.
 - Return a prediction with a confidence score.
 - Construct recognised outputs into a sequence.
 - Use AI language processing to form coherent sentences.
 - Generate output in English, Hindi or Marathi.
 - Provide a simple interface for the non-ISL user.
-- Demonstrate the workflow in a healthcare service scenario.
+- Allow the non-ISL user to respond via typed text or predefined healthcare phrase buttons.
+- Map responses to validated ISL phrase sequences and render an animated ISL Avatar.
+- Demonstrate the two-way workflow in a healthcare service scenario.
 - Provide a foundation for institutional deployment.
 
 ## 5. Non-Goals
 
 The initial MVP will not attempt:
 
-- Complete unrestricted ISL translation
+- Complete unrestricted ISL translation (both directions)
 - Recognition of all 10,000+ dictionary terms
 - Full continuous natural ISL understanding
-- Full two-way communication
+- Unrestricted free-form natural-language to continuous 3D ISL avatar generation (fake/hallucinated signs)
 - Speech output as a core MVP dependency
 - Every Indian language
 - Every public-service sector
-- Replacement of professional ISL interpreters
+- Replacement of professional ISL interpreters for complex medical diagnosis
 - Complex national government integration
 - Full enterprise certification infrastructure
 - Large-scale rural deployment before core validation
@@ -127,31 +125,35 @@ The MVP is healthcare-first, focusing on:
 ## 7. Core User Journey
 
 ``` text
+Direction A: ISL USER → NON-ISL USER
 ISL USER
    ↓
-Opens SignBridge
+Opens SignBridge (or scans QR code)
    ↓
-Selects output language
+Selects output language (English / Hindi / Marathi)
    ↓
-Starts camera
+Starts camera & performs ISL gesture
    ↓
-Performs supported ISL gesture/sign
+Computer Vision (MediaPipe 84 keypoints)
    ↓
-Computer Vision
+CNN-based recognition + confidence score (≥0.75)
    ↓
-Initial CNN-based recognition
+Sequence construction & AI language framing
    ↓
-Prediction + confidence
+NON-ISL USER READS TEXT
+
+Direction B: NON-ISL USER → ISL USER
+NON-ISL USER
    ↓
-Sequence construction
+Types message OR taps predefined healthcare button
    ↓
-AI language processing
+Language Processing & Phrase Matching
    ↓
-Coherent message
+Supported ISL phrase sequence mapping
    ↓
-English / Hindi / Marathi
+Animated ISL Avatar Player
    ↓
-NON-ISL USER UNDERSTANDS
+ISL USER UNDERSTANDS RESPONSE
 ```
 
 ## 8. Technical Architecture
@@ -250,33 +252,40 @@ language only.
 
 ### 11.3 Communication Interface
 
-The screen should show:
-
-- Camera feed
-- Recognition status
-- Recognised sequence
-- Confidence indication
-- Generated message
-- Output language
-- Clear/retry controls
-
-Example:
+The screen should provide a balanced dual-panel layout (or tabbed view on mobile):
 
 ``` text
 SIGNBRIDGE COMMUNICATION
+Hospital Service Desk
 
 Output Language: [ English ▼ ]
 
-[ CAMERA FEED ]
-
-Detected:
-I → NEED → HELP
-
-Generated Message:
-"I need help."
-
-[Clear] [Start Again]
+┌────────────────────────────┬────────────────────────────┐
+│   DIRECTION A: ISL → TEXT   │   DIRECTION B: TEXT → ISL  │
+│                            │                            │
+│   [ CAMERA FEED ]          │   Type Message:            │
+│                            │   ┌──────────────────────┐ │
+│   Detected Sequence:       │   │ Please wait here     │ │
+│   I → NEED → HELP          │   └──────────────────────┘ │
+│                            │   [ Show in ISL Avatar ]   │
+│   Generated Message:       │                            │
+│   "I need help."           │   Predefined Quick Buttons:│
+│                            │   [ Please wait ]          │
+│   [Clear] [Start Again]    │   [ Go to registration ]   │
+│                            │   [ Your appointment ok ]  │
+│                            │                            │
+│                            │   [ ANIMATED AVATAR ]      │
+│                            │   [▶ Play] [↻ Replay]      │
+└────────────────────────────┴────────────────────────────┘
 ```
+
+### 11.4 Two-Way ISL Avatar Communication Module
+
+- **Input Methods**: Typed text input box or Quick Predefined Healthcare Buttons.
+- **Controlled Phrase Library**: Predefined validated mappings for Reception, Registration, Appointment, Navigation, and General Assistance.
+- **Phrase Service**: Maps selected or typed text to validated ISL animation sequences (`please_wait` → `PLEASE` → `WAIT` → `HERE`).
+- **Avatar Player**: Renders animated ISL gestures with playback controls (`Play`, `Pause`, `Replay`).
+- **Safety Fallback**: Rejects unvalidated text inputs or complex clinical queries with an interpreter escalation warning.
 
 ### 11.4 ISL Learning & Practice
 
@@ -345,9 +354,14 @@ experts should validate:
 | FR-10 | Generated message is clearly displayed to the non-ISL user.    |
 | FR-11 | User can clear the sequence and restart.                       |
 | FR-12 | Institution-specific QR access can launch communication.       |
-| FR-13 | Basic ISL learning content is available.                       |
-| FR-14 | Basic institutional training and usage metrics can be tracked. |
-| FR-15 | Users/institutions can provide feedback.                       |
+| FR-13 | Non-ISL user can enter text or select a predefined phrase.     |
+| FR-14 | System maps supported text phrases to validated ISL sequences.|
+| FR-15 | System renders animated ISL Avatar playback (Play/Pause/Replay).|
+| FR-16 | UI provides Quick Predefined Buttons for healthcare scenarios.  |
+| FR-17 | Unsupported/complex clinical queries display interpreter warning.|
+| FR-18 | Basic ISL learning content is available.                       |
+| FR-19 | Basic institutional training and usage metrics can be tracked. |
+| FR-20 | Users/institutions can provide feedback.                       |
 
 ## 13. Non-Functional Requirements
 
@@ -402,10 +416,38 @@ ISL user communicates:
 
 ISL user communicates:
 
+### Assistance
+
+ISL user communicates:
+
 > I need help.
 
-The MVP should focus on routine service communication and should not be
-positioned as a medical diagnosis or clinical decision-making system.
+### Reverse Communication (Non-ISL → ISL Avatar)
+
+Receptionist responds via Quick Button or Text:
+
+> "Please wait here." → Avatar animates: **PLEASE → WAIT → HERE**  
+> "Go to registration." → Avatar animates: **GO → REGISTRATION**
+
+### Healthcare Safety Boundary
+
+The MVP focus is strictly routine service communication (reception, registration, appointments, navigation, general assistance).
+
+**Autonomous SignBridge Suitable**:
+- Reception desk inquiries
+- OPD registration guidance
+- Appointment status checks
+- Direction/navigation inside hospital
+- Billing & pharmacy desk directions
+
+**Interpreter Escalation Required (Not suitable for autonomous AI)**:
+- Medical diagnosis & clinical consultations
+- Informed consent & surgery risk explanations
+- Complex treatment regimens & medication side-effects
+- Emergency clinical triage
+
+When complex medical phrasing is entered, SignBridge will display:
+> *"For complex clinical communication, please escalate to a qualified ISL interpreter."*
 
 ## 15. Technical Stack Direction
 
@@ -717,23 +759,29 @@ The MVP is functional when:
 
 ## 28. Primary Demo
 
-The main demo should be a healthcare reception interaction.
+The main demo should be a two-way healthcare reception interaction.
 
 Example:
 
-1.  Deaf/ISL user arrives at a hospital.
-2.  Receptionist does not know ISL.
-3.  User opens SignBridge or scans the institution QR code.
-4.  User selects Marathi.
-5.  User signs a supported request.
-6.  Camera captures the gesture.
-7.  CV processes the input.
-8.  CNN predicts the sign.
-9.  Confidence is shown.
-10. Recognised outputs are assembled.
-11. AI language processing creates the message.
-12. Marathi text is shown to the receptionist.
-13. The same message can be demonstrated in English and Hindi.
+1. **Step 1 (ISL → Text)**:
+   - Deaf/ISL user arrives at hospital OPD desk.
+   - User scans QR code on desk standee.
+   - User selects Marathi (मराठी).
+   - User signs: `I` `NEED` `APPOINTMENT`.
+   - Camera captures gesture → MediaPipe extracts 84 keypoints → CNN model recognizes signs with confidence (>0.90).
+   - AI language framing layer creates Marathi sentence: *"मला अपॉइंटमेंट हवी आहे."* (English: *"I need an appointment."*).
+   - Text displays on screen for receptionist.
+
+2. **Step 2 (Text → ISL Avatar Response)**:
+   - Receptionist taps Quick Button: `[ Please wait here ]`.
+   - System maps phrase to validated sequence: `PLEASE` → `WAIT` → `HERE`.
+   - Animated Avatar plays ISL gesture sequence.
+   - Deaf user views avatar on phone/screen and understands response.
+
+3. **Step 3 (Navigation Response)**:
+   - Receptionist taps Quick Button: `[ Go to registration ]`.
+   - Avatar plays sequence: `GO` → `REGISTRATION`.
+   - Proves reliable end-to-end two-way communication.
 
 ## 29. Product Positioning
 
@@ -752,16 +800,7 @@ The product is the broader accessibility ecosystem.
 
 ## 30. Final Product Definition
 
-> **SignBridge India is a multilingual ISL communication and
-> institutional accessibility platform whose MVP converts a defined set
-> of ISL gestures/characters captured through a camera into coherent
-> English, Hindi or Marathi text using computer vision, an initial
-> CNN-based recognition model, sequence construction and AI language
-> processing. The broader platform combines this communication layer
-> with ISL learning, service-point access, institutional dashboards,
-> assessment and readiness monitoring, enabling immediate communication
-> support while institutions progressively build long-term ISL
-> capability.**
+> **SignBridge India is a multilingual ISL communication and institutional accessibility platform. Its MVP provides a healthcare-focused two-way communication bridge: converting camera-captured ISL gestures into coherent English, Hindi, or Marathi text (Direction A), and converting non-ISL staff responses into validated ISL sign sequences rendered by an animated avatar (Direction B). The broader platform combines this two-way communication layer with ISL micro-learning, service-point QR access, institutional dashboards, assessment, and readiness monitoring, enabling immediate communication support while institutions progressively build long-term ISL capability.**
 
 ## 31. Guiding Development Principle
 

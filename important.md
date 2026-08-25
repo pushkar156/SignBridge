@@ -134,3 +134,62 @@ SignBridge must run smoothly on budget smartphones ($100 / ₹7,000 Android devi
    - URL parameter (`https://signbridge.in/c?inst=kem_pune&sp=opd_01`) pre-loads location context (*"KEM Hospital OPD Desk 1"*) and target output language (*Marathi / Hindi*).
 4. **Hygienic Personal Device Use**: Citizens sign into their own smartphone camera rather than touching a public shared screen.
 5. **Screen Flip Interaction**: The translated sentence (e.g. *"मला डॉक्टरांच्या भेटीची वेळ हवी आहे."*) renders on screen for the receptionist to read immediately.
+
+---
+
+## 8. Two-Way Communication Architecture & Avatar Independence Principle
+
+### Architecture Separation
+The recognition engine (Direction A: ISL → Text) and the avatar player system (Direction B: Text → ISL Avatar) operate as **completely independent pipelines**:
+
+```
+[ Direction A: ISL → Text ]
+Camera → MediaPipe CV (84 keypoints) → Neural Model → Sequence Buffer → LLM Framing → Multilingual Text
+
+[ Direction B: Text → ISL Avatar ]
+Typed Text / Quick Button → Phrase Service → Controlled Mapping → Validated Sign Sequence → Avatar Player
+```
+
+- **No Shared Model Dependency**: The gesture classifier model is not used for avatar rendering.
+- **Independent Failure Domains**: A failure or retrying of recognition on Direction A does not block or impair Direction B playback.
+
+---
+
+## 9. Avatar Implementation Strategy: Correctness > Realism
+
+### Non-Goal: Unrestricted 3D Natural-Language Generation
+For the MVP, we explicitly avoid generating continuous, real-time 3D human avatar animations for arbitrary text. Unrestricted LLM-to-3D sign translation risks generating linguistically incorrect, hallucinated, or unvalidated hand signs.
+
+### Controlled Level 1 / Level 2 Animation Pipeline
+- **Level 1 (Predefined Sign Clips)**: Pre-rendered, validated video clips/animations for individual supported ISL signs (`PLEASE`, `WAIT`, `HERE`, `GO`, `REGISTRATION`).
+- **Level 2 (Sequence Stitching)**: Combining individual sign clips into fluid phrase sequences (`PLEASE` + `WAIT` + `HERE`).
+- **Linguistic Validation**: Every phrase mapping in `phrases.json` is audited by ISL experts before deployment (`validated: true`).
+
+---
+
+## 10. Healthcare Safety Boundary & Interpreter Escalations
+
+### Autonomous AI Scope vs Escalation Criteria
+SignBridge MVP is designed for **routine service interactions** in public healthcare touchpoints.
+
+| Category | Permitted Autonomous Scope | Interpreter Escalation Required |
+| :--- | :--- | :--- |
+| **Reception & OPD** | Token numbers, registration desk direction, general help | Complex registration disputes, legal disclosures |
+| **Appointments** | Doctor availability, room numbers, waiting alerts | Clinical diagnosis, symptom consultation |
+| **Pharmacy & Billing** | Counter directions, payment queue guidance | Medication dosage instruction, drug allergy warning |
+| **Clinical / Surgery** | *None* | Informed consent, surgery risks, procedure details |
+
+### Safety Guardrail Mechanism
+If staff attempts to enter unvalidated clinical text or complex medical descriptions into the avatar system, the system triggers a safety fallback card:
+
+```text
+┌────────────────────────────────────────────────────────┐
+│ ⚠️ CLINICAL SAFETY BOUNDARY TRIGGERED                   │
+│                                                        │
+│ Complex medical instructions or clinical consultations │
+│ require a certified human ISL interpreter.              │
+│                                                        │
+│ [ Call On-Duty ISL Interpreter ] [ Re-enter Simple ]   │
+└────────────────────────────────────────────────────────┘
+```
+

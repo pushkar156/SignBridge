@@ -42,6 +42,10 @@ signbridge-india/
 │       │   ├── recognition/
 │       │   ├── communication/
 │       │   ├── language/
+│       │   ├── avatar/
+│       │   │   ├── AvatarPlayer
+│       │   │   ├── PhraseSelector
+│       │   │   └── AvatarControls
 │       │   ├── learning/
 │       │   └── dashboard/
 │       │
@@ -85,6 +89,8 @@ signbridge-india/
 │   │   │   ├── sequence_service.py
 │   │   │   ├── language_service.py
 │   │   │   ├── communication_service.py
+│   │   │   ├── avatar_service.py
+│   │   │   ├── phrase_service.py
 │   │   │   ├── institution_service.py
 │   │   │   └── training_service.py
 │   │   │
@@ -149,11 +155,14 @@ signbridge-india/
 │       └── test_model.py
 │
 ├── data/
-│   ├── README.md
-│   ├── class_map/
-│   │   └── labels.json
-│   └── samples/
-│       └── .gitkeep
+│       ├── README.md
+│       ├── class_map/
+│       │   └── labels.json
+│       ├── isl_phrases/
+│       │   ├── phrases.json
+│       │   └── sign_mapping.json
+│       └── samples/
+│           └── .gitkeep
 │
 ├── scripts/
 │   ├── setup.sh
@@ -332,6 +341,17 @@ LanguageSelector
 LanguageBadge
 ```
 
+### `/avatar`
+
+Examples:
+
+```text
+AvatarPlayer
+PhraseSelector
+QuickPhraseButtons
+AvatarControls
+```
+
 ### `/learning`
 
 Examples:
@@ -507,6 +527,26 @@ Responsibilities:
 - Track session state
 - Record appropriate non-sensitive usage metrics
 - Connect recognition + sequence + language layers
+
+---
+
+## `avatar_service.py`
+
+Responsibilities:
+
+- Render/resolve ISL sign sequence animations
+- Serve avatar animation assets/metadata
+- Handle animation playback state (Play/Pause/Replay)
+
+---
+
+## `phrase_service.py`
+
+Responsibilities:
+
+- Maintain controlled healthcare phrase library
+- Match receptionist text input to validated ISL phrase sequences
+- Handle medical escalation triggers for complex clinical queries
 
 ---
 
@@ -694,10 +734,42 @@ Suggested endpoints:
 /api/recognition
 /api/communication
 /api/language
+/api/avatar
 /api/institutions
 /api/training
 /api/assessment
 /api/feedback
+```
+
+### Avatar & Reverse Communication
+
+```text
+POST /api/avatar/translate
+GET /api/avatar/phrases
+```
+
+Example request (`POST /api/avatar/translate`):
+
+```json
+{
+  "text": "Please wait here.",
+  "language": "en"
+}
+```
+
+Example response:
+
+```json
+{
+  "phrase_id": "please_wait",
+  "isl_sequence": ["PLEASE", "WAIT", "HERE"],
+  "animation_urls": [
+    "/assets/avatar/signs/PLEASE.mp4",
+    "/assets/avatar/signs/WAIT.mp4",
+    "/assets/avatar/signs/HERE.mp4"
+  ],
+  "validated": true
+}
 ```
 
 Example:

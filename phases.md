@@ -25,10 +25,10 @@ This directory contains detailed technical specifications, workflows, architectu
    *Multi-target regional language translation, Devanagari Unicode rendering, and dynamic language switching.*
 
 7. **[Phase 6: Core Communication MVP Integration](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_06_core_communication_mvp.md)**  
-   *Full integration of camera, recognition, sequence, AI framing, and multilingual UI into a unified screen.*
+   *Full integration of camera recognition (ISL → Text) and controlled phrase Avatar player (Text → ISL Avatar) into a unified two-way screen.*
 
 8. **[Phase 7: Healthcare Service Workflow & QR Entry](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_07_healthcare_service_workflow.md)**  
-   *Point-of-service QR standee entry, reception/OPD phrase packs, and privacy-preserving sessions.*
+   *Point-of-service QR standee entry, Quick Healthcare Phrase buttons, Avatar animation playback, and medical escalation boundaries.*
 
 9. **[Phase 8: ISL Learning & Practice Module](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_08_isl_learning_practice.md)**  
    *Bite-sized healthcare employee courses, interactive CV gesture scoring, and progress tracking.*
