@@ -489,22 +489,21 @@ Example response:
 
 ```json
 {
-  "class": "HELP",
-  "confidence": 0.94
+  "class": "H",
+  "confidence": 0.96
 }
 ```
-
----
 
 ## `sequence_service.py`
 
 Responsibilities:
 
-- Maintain recognised sequence
-- Add predictions
-- Remove predictions
-- Clear sequence
-- Prepare sequence for language processing
+- Maintain recognised character sequence buffer (`[H, E, L, P]`)
+- Apply **Hold-to-Confirm** temporal stabilization (require $N$ consecutive identical frame predictions before committing)
+- Suppress duplicate contiguous character candidate streams (`HHHHH` → `H`)
+- Perform **Pause-Based Word Boundary Detection** (1.0s–1.5s idle pause inserts a space boundary)
+- Assemble raw character buffers into word strings (`HELP`)
+- Prepare word sequences (`HELP I NEED`) for AI sentence framing layer
 
 ---
 
@@ -578,23 +577,21 @@ Responsibilities:
 The ML pipeline should be:
 
 ```text
-Raw Dataset
+Raw Kaggle ISL Dataset (35 Classes: A-Z, 1-9)
     ↓
-Cleaning
-    ↓
-Preprocessing
+MediaPipe Hand Cropping & Normalization
     ↓
 Train / Validation / Test Split
     ↓
-Augmentation
+Data Augmentation (Jitter, Rotation, Scale)
     ↓
-CNN Training
+CNN Model Fine-Tuning (Pretrained Reference Adaptation)
     ↓
-Evaluation
+Evaluation & Metric Scoring
     ↓
-Model Export
+ONNX / Model Export
     ↓
-Inference
+Inference & Hold-to-Confirm Stabilization
 ```
 
 ---
@@ -612,17 +609,19 @@ ml/data/
 └── test/
 ```
 
-Example:
+Example (35 Character Classes):
 
 ```text
 train/
 ├── class_A/
 ├── class_B/
-├── class_C/
-└── ...
+├── ...
+├── class_Z/
+├── class_1/
+└── class_9/
 ```
 
-The actual number of classes must match the validated MVP scope.
+The 35 classes correspond to 26 alphabets (`A-Z`) and 9 digits (`1-9`).
 
 ---
 
@@ -639,17 +638,29 @@ Example:
 ```json
 {
   "0": {
-    "label": "HELP",
-    "type": "supported_sign",
+    "label": "A",
+    "type": "supported_character",
     "validated": true
   },
   "1": {
-    "label": "I",
+    "label": "B",
     "type": "supported_character",
+    "validated": true
+  },
+  "25": {
+    "label": "Z",
+    "type": "supported_character",
+    "validated": true
+  },
+  "26": {
+    "label": "1",
+    "type": "supported_digit",
     "validated": true
   }
 }
 ```
+
+The exact labels come from Kaggle ISL Dataset 1 (35 classes).
 
 The exact labels must come from the validated dataset.
 

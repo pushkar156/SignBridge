@@ -17,7 +17,7 @@ The immediate MVP focuses on a real-time, low-latency **two-way communication br
 
 ```
 Direction A: ISL → Multilingual Text (Primary)
-[ ISL Gesture ] ──> [ CV / MediaPipe ] ──> [ Neural Model ] ──> [ Sequence Buffer ] ──> [ LLM Framing ] ──> [ EN / HI / MR Text ]
+[ ISL Gesture ] ──> [ MediaPipe Crop ] ──> [ CNN Character Model (35 classes) ] ──> [ Hold-to-Confirm ] ──> [ Word Buffer ] ──> [ LLM Framing ] ──> [ EN / HI / MR Text ]
 
 Direction B: Text → ISL Avatar (Reverse)
 [ Non-ISL Staff ] ──> [ Type / Quick Button ] ──> [ Phrase Mapping ] ──> [ Animated ISL Avatar ] ──> [ ISL User ]
@@ -78,6 +78,10 @@ SignBridge combines three complementary layers:
 6. **Two-Way Communication & Avatar Independence**:
    - Direction A (ISL → Text) and Direction B (Text → Avatar) are separate, independent pipelines.
    - Avatar uses Level 1/2 predefined, validated ISL gesture animations (`PLEASE`, `WAIT`, `HERE`, `GO`, `REGISTRATION`) to ensure 100% linguistic accuracy without hallucinating signs.
+7. **Character-Level Classification & Temporal Stabilization**:
+   - ML model classifies 35 Kaggle ISL character classes (`A-Z`, `1-9`).
+   - Uses **Hold-to-Confirm** stabilization (consecutive frame agreement) to suppress duplicate character streams.
+   - **Pause-Based Word Boundary**: A 1.0s–1.5s idle pause automatically inserts a word boundary space (`HELP` + [pause] + `I` + [pause] + `NEED`).
 
 ---
 

@@ -20,7 +20,7 @@ institutions.
 The MVP focuses on a practical two-way communication bridge:
 
 **Direction A: ISL → Text (Primary)**
-ISL gesture → Computer Vision → Initial CNN-based recognition → Confidence score → Sequence construction → AI language processing → English / Hindi / Marathi text
+ISL gesture → Computer Vision (MediaPipe) → CNN Character Recognition (35 classes: A-Z, 1-9) → Hold-to-Confirm Stabilization → Character/Word Sequence Assembly → AI Language Processing → English / Hindi / Marathi Text
 
 **Direction B: Text → ISL Avatar (Reverse)**
 Non-ISL User → Types message / selects predefined phrase → Language Processing → Supported ISL phrase mapping → Animated ISL Avatar → ISL User
@@ -160,27 +160,29 @@ ISL USER UNDERSTANDS RESPONSE
 
 ### Recognition Pipeline
 
-1.  **Input Capture:** Camera captures the user’s hand gestures.
-2.  **Computer Vision:** The CV layer processes the camera input.
-3.  **Initial CNN Recognition:** The CNN classifies supported
-    signs/characters.
-4.  **Confidence:** Each prediction receives a confidence score.
-5.  **Sequence Construction:** Recognised outputs are maintained in
-    order.
-6.  **AI Language Processing:** The sequence is reconstructed into
-    coherent language.
-7.  **Multilingual Output:** The final message is displayed in English,
-    Hindi or Marathi.
+1. **Input Capture:** Camera captures live video frames.
+2. **Computer Vision:** MediaPipe detects hands and crops the region of interest.
+3. **CNN Character Classifier:** Classifies supported ISL characters (35 classes: `A-Z`, `1-9`).
+4. **Confidence Scoring:** Each prediction returns a confidence score ($0.0 - 1.0$).
+5. **Hold-to-Confirm Stabilization:** Requires identical class predictions across consecutive frames with confidence $\ge \text{threshold}$ before accepting into buffer.
+6. **Pause-Based Word Boundary Detection:** A 1.0–1.5 second pause between gestures inserts a word space boundary (`HELP` + [pause] + `I` + [pause] + `NEED`).
+7. **AI Language Processing:** The word sequence (`HELP I NEED`) is converted into a coherent sentence (*"I need help."*).
+8. **Multilingual Output:** Displayed in English (primary for 3-day MVP), Hindi, or Marathi.
 
 Example:
 
 ``` text
-Gesture
+Gesture (H)
   ↓
-CNN
+MediaPipe Hand Crop
   ↓
-Prediction: HELP
-Confidence: 0.94
+CNN (35 Classes)
+  ↓
+Prediction: H (Confidence: 0.96)
+  ↓
+Hold-to-Confirm (3 Consecutive Frames)
+  ↓
+Buffer: [ H ]
 ```
 
 A low-confidence result should trigger retry/clarification rather than
@@ -209,24 +211,24 @@ This architecture allows additional Indian languages to be added later.
 
 ## 10. Vocabulary Strategy
 
-The MVP uses a **defined and validated set of supported ISL
-sign/character classes**.
+The competition MVP uses **Kaggle ISL Dataset 1** consisting of **35 character-level classes**:
+- Alphabets: `A` to `Z` (26 classes)
+- Digits: `1` to `9` (9 classes, no `0`)
 
-The existing 10,000-term ISL Dictionary is treated as a broader national
-language/resource ecosystem, not as the number of initial CNN classes.
+The ML model performs **character-level recognition** (`ISL sign → Character`). The application layer constructs words (`HELP`, `DOCTOR`, `APPOINTMENT`, `REGISTRATION`) and sentences from the stabilized character stream.
 
 Expansion path:
 
 ``` text
-Defined MVP classes
+35 Character MVP Classes (A-Z, 1-9)
       ↓
-Larger validated vocabulary
+Word Assembly Layer (HELP, DOCTOR)
       ↓
-Word-level recognition
+Larger Validated Word Vocabulary
       ↓
-Temporal/sequence recognition
+Temporal/Sequence Sign Recognition
       ↓
-Richer ISL understanding
+Continuous ISL Understanding
 ```
 
 Do not claim complete dictionary recognition unless it has actually been
@@ -557,7 +559,31 @@ Improve
 The pilot should include ISL/community validation and participating
 frontline staff.
 
-## 19. 90-Day Development Plan
+## 19. 3-Day Competition MVP & 90-Day Development Plan
+
+### Urgent 3-Day Competition MVP Plan (Future 6.0 Round)
+
+- **Day 1: ML Recognition & Webcam Pipeline**
+  - Adapt pretrained reference pipeline (`BRO-CODES-HERE`) & fine-tune on 35-class Kaggle ISL dataset (`A-Z`, `1-9`).
+  - MediaPipe hand cropping & image normalization.
+  - Implement Hold-to-Confirm stabilization logic.
+  - *Success Target*: Live webcam outputting a clean character stream (`H` `E` `L` `P`).
+
+- **Day 2: SignBridge Core & English Framing**
+  - Character buffer to word assembly (`HELP`).
+  - Pause-based word boundary detection (1.2s pause).
+  - LLM AI sentence framing layer (*"I need help."*).
+  - Mobile-first Communication UI integration (English output focus).
+
+- **Day 3: Demo Polish, Avatar & QR Standees**
+  - Quick Predefined Healthcare Buttons (`Please wait`, `Go to registration`).
+  - Reverse ISL Avatar animation player.
+  - Hospital QR standee context routing.
+  - Institutional readiness dashboard polish & regional language toggle (Hindi/Marathi).
+
+---
+
+### Broader 90-Day Institutional Pilot Plan
 
 ### Days 1–30: Build & Validate
 

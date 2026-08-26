@@ -8,34 +8,34 @@
 
 ## 1. Phase Overview
 
-Phase 3 builds the sequence construction layer. It collects high-confidence predictions emitted by the recognition engine over time, filters rapid duplicate detections, manages ordering, and provides editing controls (undo, delete, clear) to form a structured gesture sequence ready for AI language framing.
+Phase 3 builds the sequence construction layer. It receives live character predictions from the recognition engine (`H`, `E`, `L`, `P`), applies **Hold-to-Confirm** prediction stabilization across consecutive frames, filters duplicate candidate streams, inserts word boundaries during 1.0–1.5 second pauses, and assembles words (`HELP`) ready for AI sentence framing.
 
 ---
 
 ## 2. Technical Architecture & State Management
 
 ```
-[ Prediction Stream ] ──(Confidence >= 0.75)──> [ Debouncer / Hold Validator ]
+[ Prediction Stream ] ──(Confidence >= 0.75)──> [ Hold-to-Confirm Validator ]
                                                           │
                                                           ▼
-                                                [ Sequence Buffer ]
-                                                ["I", "NEED", "HELP"]
+                                            [ Character Sequence Buffer ]
+                                              ['H', 'E', 'L', 'P', ' ']
+                                                          │ (Pause >= 1.2s)
+                                                          ▼
+                                               [ Word Assembly Layer ]
+                                                 ["HELP", "I", "NEED"]
                                                           │
-                                               ┌──────────┴──────────┐
-                                               ▼                     ▼
-                                       [ UI Renderer ]     [ AI Framing Layer ]
+                                                ┌─────────┴─────────┐
+                                                ▼                   ▼
+                                        [ UI Renderer ]    [ AI Framing Layer ]
 ```
 
 ### Sequence Data Structure
 ```json
 {
   "session_id": "sess_102938",
-  "sequence": [
-    { "id": 1, "class": "I", "confidence": 0.96, "timestamp": 1776882000 },
-    { "id": 2, "class": "NEED", "confidence": 0.91, "timestamp": 1776882003 },
-    { "id": 3, "class": "HELP", "confidence": 0.94, "timestamp": 1776882007 }
-  ],
-  "formatted_raw": ["I", "NEED", "HELP"],
+  "characters": ["H", "E", "L", "P", " ", "I", " ", "N", "E", "E", "D"],
+  "words": ["HELP", "I", "NEED"],
   "status": "ready_for_ai"
 }
 ```
@@ -44,17 +44,19 @@ Phase 3 builds the sequence construction layer. It collects high-confidence pred
 
 ## 3. Detailed Scope & Requirements
 
-1. **Debouncing & Hold Time Validation**:
-   - A recognized sign must remain stable for $N$ consecutive frames (e.g., 5 frames / 300 ms) before appending to avoid flickering false positives.
+1. **Hold-to-Confirm Prediction Stabilization**:
+   - A recognized character sign must remain identical across $N$ consecutive frames with confidence $\ge \text{threshold}$ (e.g., $0.75$) before committing to the buffer.
 
-2. **Duplicate Gesture Suppression**:
-   - Prevents identical consecutive signs from spamming the sequence buffer (e.g. `["HELP", "HELP", "HELP"]` $\rightarrow$ `["HELP"]`), unless separated by a deliberate hand-reset gesture or pause.
+2. **Duplicate Character Suppression**:
+   - Prevents identical consecutive frames from filling the buffer (`HHHHH` $\rightarrow$ `H`), until the user changes or resets hand position.
 
-3. **User Editing Controls**:
-   - **Undo**: Remove the last recognized gesture.
-   - **Delete Item**: Remove a specific gesture chip from the sequence list.
-   - **Clear All**: Reset the entire sequence buffer.
-   - **Manual Add**: Provide fallback button selection for unsupported/misread signs.
+3. **Pause-Based Word Boundary Detection**:
+   - A 1.0s–1.5s idle pause without confirmed gestures automatically appends a space boundary to delimit words (`HELP` + [pause] + `I` + [pause] + `NEED`).
+
+4. **User Editing Controls**:
+   - **Undo**: Remove the last recognized character or word.
+   - **Delete Item**: Remove a specific character/word chip.
+   - **Clear All**: Reset character buffer.
 
 4. **Sequence Handoff**:
    - Package sequence array and pass to backend/AI layer when user clicks "Complete Message" or when automatic silence detection triggers.

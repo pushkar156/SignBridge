@@ -10,13 +10,13 @@ This directory contains detailed technical specifications, workflows, architectu
    *Foundation, repository layout, data contracts, environment setup, and scope freezing.*
 
 2. **[Phase 1: Dataset & ISL Recognition Foundation](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_01_dataset_recognition.md)**  
-   *84-keypoint landmark extraction, normalization, augmentation, and lightweight neural classifier.*
+   *Kaggle ISL 35-class dataset (A-Z, 1-9), MediaPipe hand cropping, adaptation of open-source pretrained pipeline (BRO-CODES-HERE), and character-level classifier.*
 
 3. **[Phase 2: Camera & Computer Vision Pipeline](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_02_camera_cv_pipeline.md)**  
    *Webcam stream, MediaPipe Hands integration, CLAHE low-light pre-filter, and confidence UI indicators.*
 
 4. **[Phase 3: Sequence Construction](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_03_sequence_construction.md)**  
-   *Sequence buffer, debouncing, duplicate suppression, and gesture editing controls.*
+   *Hold-to-Confirm prediction stabilization, duplicate character suppression, 1.2s pause-based word boundary detection, character buffer, and word assembly.*
 
 5. **[Phase 4: AI Language Processing (AI Framing System)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_04_ai_language_processing.md)**  
    *LLM prompt engineering, sentence reconstruction, hallucination guardrails, and zero-network fallbacks.*

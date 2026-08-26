@@ -193,3 +193,65 @@ If staff attempts to enter unvalidated clinical text or complex medical descript
 └────────────────────────────────────────────────────────┘
 ```
 
+---
+
+## 11. Urgent 3-Day MVP ML Strategy & Pretrained Model Reuse
+
+### Objective & Rationale
+To produce a working, reliable demonstration of SignBridge India for the **YUVA Future 6.0 competition round** within a 3-day window, we do not train a recognition model completely from scratch. 
+
+Instead, we follow a **temporary MVP acceleration strategy**:
+1. **Reference Architecture**: Adapt an existing open-source ISL pipeline (e.g. `BRO-CODES-HERE/INDIAN-SIGN-LANGUAGE` on GitHub: MediaPipe hand detection/cropping + CNN).
+2. **Dataset Scope**: Train/fine-tune using **Kaggle ISL Dataset 1** (35 character classes: `A-Z` + digits `1-9`, no `0` class, ~1,200 images/class).
+3. **Character-Level Task (`ISL Sign → Character`)**:
+   - The ML model is strictly responsible for recognizing character signs (`H`, `E`, `L`, `P`), **not** full word/sentence signs.
+   - Word assembly (`HELP`) and sentence reconstruction (*"I need help."*) are handled upstream in the sequence and AI framing layers.
+4. **Modular Inference Abstraction**:
+   - The model sits behind a clean `Recognition Interface`. Post-competition, the model engine can be replaced without modifying the SignBridge UI or application services.
+
+---
+
+## 12. Prediction Stabilization & Word Boundary Mechanics
+
+### 1. Hold-to-Confirm Prediction Stabilization
+Live video streams output 30 FPS, causing identical gestures to fire repeatedly (`HHHHH`). To prevent sequence buffer overflow:
+- **Stabilization Rule**: A prediction is accepted into the character buffer **only** when the exact same class prediction remains stable across $N$ consecutive frames with confidence $\ge \text{threshold}$ (e.g., $0.75$).
+- **Locking**: Once confirmed (`CONFIRM H`), candidate accumulation locks until the user resets/changes their hand shape.
+
+```text
+Frame 1: H (0.95)
+Frame 2: H (0.96)
+Frame 3: H (0.94)  ──>  [ STABILIZED: H ]  ──>  Commit to Character Buffer
+Frame 4: H (0.95)  ──>  (Suppressed duplicate)
+```
+
+### 2. Pause-Based Word Boundary Detection
+Because character-level datasets (A-Z, 1-9) do not include a dedicated "space bar" gesture:
+- **Pause Trigger**: An idle gesture pause of **1.0 to 1.5 seconds** automatically inserts a word boundary space into the character buffer.
+- **Example Flow**:
+  $$\text{H} \rightarrow \text{E} \rightarrow \text{L} \rightarrow \text{P} \quad \xrightarrow{\text{1.2s Pause}} \quad \text{I} \quad \xrightarrow{\text{1.2s Pause}} \quad \text{N} \rightarrow \text{E} \rightarrow \text{E} \rightarrow \text{D}$$
+  $$\Downarrow$$
+  $$\text{Raw Sequence: "HELP I NEED"}$$
+  $$\Downarrow \text{ (AI Framing Layer)}$$
+  $$\text{Coherent English Sentence: "I need help."}$$
+
+---
+
+## 13. 3-Day Competition Execution Roadmap
+
+### English-First Delivery Order
+For the 3-day hackathon window, **English output is the primary target**. Regional translation (Hindi & Marathi) is performed at the AI language layer once the core English sequence-to-sentence pipeline is rock-solid.
+
+```text
+ISL Sign  ──>  Characters  ──>  English Words  ──>  English AI Sentence  ──>  Hindi / Marathi Translation
+```
+
+### 3-Day Development Priorities
+
+| Day | Priority Milestone | Key Deliverables & Success Conditions |
+| :--- | :--- | :--- |
+| **Day 1** | **ML Recognition & Webcam Pipeline** | • Adapt pretrained pipeline (`BRO-CODES-HERE`) & fine-tune on Kaggle ISL dataset (35 classes).<br>• MediaPipe hand cropping & normalization.<br>• Implement Hold-to-Confirm stabilization.<br>• *Success*: Live webcam reliably outputs stable character stream (`H` `E` `L` `P`). |
+| **Day 2** | **SignBridge Core & English Framing** | • Character buffer to word formation (`HELP`).<br>• Pause-based word boundary detection (1.2s).<br>• LLM AI sentence framing layer (*"I need help."*).<br>• Mobile-first Communication UI integration (English first). |
+| **Day 3** | **Demo Polish, Avatar & QR Standees** | • Quick Healthcare Phrase buttons & reverse ISL Avatar player.<br>• Hospital reception QR standee routing.<br>• Basic institutional readiness dashboard.<br>• Multilingual output toggle (Hindi & Marathi). |
+
+
