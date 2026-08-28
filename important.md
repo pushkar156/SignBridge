@@ -109,19 +109,17 @@ Multilingual Output (English / Hindi / Marathi)
 
 ---
 
-## 6. Low-End Devices & Mobile PWA Deployment Strategy
+## 6. Low-End Devices & Mobile Deployment Strategy
 
 ### Problem Statement
 SignBridge must run smoothly on budget smartphones ($100 / ₹7,000 Android devices) and low-power hospital reception terminals without requiring a heavy app store installation.
 
-### Technical Solution: Progressive Web App (PWA)
-1. **Zero-Friction Access**: Users scan a QR code and open the app instantly in Chrome/Safari without downloading a 50 MB APK.
-2. **Client-Side WebAssembly (WASM) & ONNX Web**:
-   - MediaPipe Hands (`model_complexity: 0`) and ONNX Web run inside the device browser via WebAssembly and WebGL.
-   - Operates at **25–30 FPS** directly on mobile ARM chipsets.
-3. **Zero Bandwidth Video Overhead**:
-   - Camera frames are processed **locally on the user's phone**. Video is never transmitted over the network. Only small text tokens/landmark vectors pass over 3G/4G.
-4. **Offline Caching**: Service Workers cache assets and model weights (<100 KB) for instant offline access.
+### Technical Solution (Current MVP Approach):
+1. **Zero-Friction Web Access**: Users scan a QR code and open the app instantly in Chrome/Safari without downloading a 50 MB APK.
+2. **Server-Side Inference (Track Change)**: 
+   - *Original Plan*: Run everything client-side via WebAssembly to save bandwidth.
+   - *Current Implementation*: For the MVP, mobile browsers capture camera frames and send them as base64 images to the Python Flask backend (`/predict`). The backend runs MediaPipe Hands and the custom Keras model, then returns the result. This simplifies the MVP deployment while still ensuring the user only needs a web browser.
+3. **Mobile Camera Access**: Requires serving the app over HTTPS (even locally using self-signed certificates) so mobile browsers grant `getUserMedia` permissions.
 
 ---
 
@@ -195,14 +193,14 @@ If staff attempts to enter unvalidated clinical text or complex medical descript
 
 ---
 
-## 11. Urgent 3-Day MVP ML Strategy & Pretrained Model Reuse
+## 11. Urgent 3-Day MVP ML Strategy & Track Change
 
 ### Objective & Rationale
-To produce a working, reliable demonstration of SignBridge India for the **YUVA Future 6.0 competition round** within a 3-day window, we do not train a recognition model completely from scratch. 
+To produce a working, reliable demonstration of SignBridge India for the **YUVA Future 6.0 competition round** within a 3-day window, we originally planned to use an existing image-based CNN (e.g. `BRO-CODES-HERE`). However, we **changed tracks** because CNNs failed on real webcam input.
 
-Instead, we follow a **temporary MVP acceleration strategy**:
-1. **Reference Architecture**: Adapt an existing open-source ISL pipeline (e.g. `BRO-CODES-HERE/INDIAN-SIGN-LANGUAGE` on GitHub: MediaPipe hand detection/cropping + CNN).
-2. **Dataset Scope**: Train/fine-tune using **Kaggle ISL Dataset 1** (35 character classes: `A-Z` + digits `1-9`, no `0` class, ~1,200 images/class).
+Instead, we implemented a **Hybrid 84-Keypoint Landmark Model**:
+1. **Reference Architecture (The Shift)**: We abandoned the CNN and built a hybrid model combining the best of the **Maitree Model** (which proved that processing relative landmarks is superior to raw pixels) and the **Bros Model's logic** (adapted to capture 2 hands / 84 keypoints using the modern MediaPipe Tasks API).
+2. **Dataset Scope**: We extract these 84 keypoints from the **Kaggle ISL Dataset 1** (35 character classes: `A-Z` + digits `1-9`) and train a highly optimized, lightweight Multi-Layer Perceptron (MLP).
 3. **Character-Level Task (`ISL Sign → Character`)**:
    - The ML model is strictly responsible for recognizing character signs (`H`, `E`, `L`, `P`), **not** full word/sentence signs.
    - Word assembly (`HELP`) and sentence reconstruction (*"I need help."*) are handled upstream in the sequence and AI framing layers.
@@ -250,7 +248,7 @@ ISL Sign  ──>  Characters  ──>  English Words  ──>  English AI Sente
 
 | Day | Priority Milestone | Key Deliverables & Success Conditions |
 | :--- | :--- | :--- |
-| **Day 1** | **ML Recognition & Webcam Pipeline** | • Adapt pretrained pipeline (`BRO-CODES-HERE`) & fine-tune on Kaggle ISL dataset (35 classes).<br>• MediaPipe hand cropping & normalization.<br>• Implement Hold-to-Confirm stabilization.<br>• *Success*: Live webcam reliably outputs stable character stream (`H` `E` `L` `P`). |
+| **Day 1** | **ML Recognition & Webcam Pipeline** | • Build the 84-keypoint Hybrid MLP (Maitree + Bros).<br>• Generate dataset from Kaggle images and train model.<br>• Implement Hold-to-Confirm stabilization.<br>• *Success*: Live webcam reliably outputs stable character stream (`H` `E` `L` `P`). |
 | **Day 2** | **SignBridge Core & English Framing** | • Character buffer to word formation (`HELP`).<br>• Pause-based word boundary detection (1.2s).<br>• LLM AI sentence framing layer (*"I need help."*).<br>• Mobile-first Communication UI integration (English first). |
 | **Day 3** | **Demo Polish, Avatar & QR Standees** | • Quick Healthcare Phrase buttons & reverse ISL Avatar player.<br>• Hospital reception QR standee routing.<br>• Basic institutional readiness dashboard.<br>• Multilingual output toggle (Hindi & Marathi). |
 

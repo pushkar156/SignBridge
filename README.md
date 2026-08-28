@@ -17,7 +17,7 @@ The immediate MVP focuses on a real-time, low-latency **two-way communication br
 
 ```
 Direction A: ISL → Multilingual Text (Primary)
-[ ISL Gesture ] ──> [ MediaPipe Crop ] ──> [ CNN Character Model (35 classes) ] ──> [ Hold-to-Confirm ] ──> [ Word Buffer ] ──> [ LLM Framing ] ──> [ EN / HI / MR Text ]
+[ ISL Gesture ] ──> [ MediaPipe Keypoints (84) ] ──> [ MLP Landmark Model (35 classes) ] ──> [ Hold-to-Confirm ] ──> [ Word Buffer ] ──> [ LLM Framing ] ──> [ EN / HI / MR Text ]
 
 Direction B: Text → ISL Avatar (Reverse)
 [ Non-ISL Staff ] ──> [ Type / Quick Button ] ──> [ Phrase Mapping ] ──> [ Animated ISL Avatar ] ──> [ ISL User ]
@@ -68,9 +68,9 @@ SignBridge combines three complementary layers:
    - Captures 21 3D joint landmarks per hand ($2 \times 21 \times 2 = 84$ normalized coordinates) to support complex two-handed ISL healthcare signs (`HELP`, `NEED`, `DOCTOR`).
 2. **Lightweight Model & Overfitting Mitigation**:
    - Uses an optimized ~15,000 parameter MLP classifier (<100 KB file size) trained with subject-based data splitting to prevent frame-leakage overfitting.
-3. **Low-End Mobile & Progressive Web App (PWA)**:
-   - Runs client-side via WebAssembly (WASM) and ONNX Web at **25–30 FPS on $100 budget Android smartphones**.
-   - Zero video streaming over internet—camera frames are processed locally on device for privacy and low 3G bandwidth usage.
+3. **Low-End Mobile Deployment (Current MVP Server-Side)**:
+   - Users access the web app instantly via Chrome/Safari by scanning a QR code.
+   - For the MVP, mobile devices capture frames and send them as lightweight base64 payloads to the Python backend (`app.py`), where MediaPipe and the custom `.h5` model run inference. This avoids heavy client-side downloads while maintaining low latency.
 4. **Point-of-Service QR Standee Access**:
    - Patients scan a counter QR standee (like Google Pay UPI) to instantly open SignBridge with location context (*"KEM Hospital OPD Desk 1"*) without downloading an app.
 5. **Confidence Filtering & Retry Handling**:
@@ -87,11 +87,11 @@ SignBridge combines three complementary layers:
 
 ## 5. Technology Stack
 
-- **Frontend**: Mobile-First Progressive Web App (React / Next.js, HTML5 Camera API, Tailwind CSS, Noto Sans Devanagari fonts, Animated Avatar Player).
-- **Computer Vision**: MediaPipe Hands JS (WebAssembly / WebGL runtime, CLAHE low-light pre-filter).
-- **Machine Learning**: Python 3.11, TensorFlow / Keras, ONNX Runtime Web, Scikit-learn.
-- **Backend API**: Python FastAPI / Uvicorn (Fast REST API endpoints, Pydantic validation).
-- **AI Framing & Phrase Mapping**: LLM Prompt Processing for ISL gloss-to-sentence reconstruction (Direction A) & Controlled Healthcare Phrase Service (Direction B).
+- **Frontend**: Lightweight HTML/JS templates served by Flask (HTML5 Camera API, simple UI).
+- **Computer Vision**: MediaPipe Hands Tasks API (Python Server-side extraction of 84 landmarks).
+- **Machine Learning**: Python 3.11, TensorFlow / Keras (Custom lightweight MLP model).
+- **Backend API**: Python Flask (`app.py`) for handling base64 image streams, model inference, and AI sentence framing.
+- **AI Brain**: Gemini API (`gemini-1.5-flash`) for intelligent ISL gloss-to-sentence reconstruction.
 - **Database**: SQLite / PostgreSQL (SQLAlchemy ORM for institutions, staff progress, and analytics).
 
 ---
@@ -151,9 +151,9 @@ cd signbridge-india
 cp .env.example .env
 ```
 
-### 2. Backend Setup
+### 2. App Setup & Run
 ```bash
-cd backend
+cd src
 python -m venv venv
 # Windows:
 .\venv\Scripts\activate
@@ -161,16 +161,9 @@ python -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python app.py
 ```
-
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Open `http://localhost:3000` in your browser.
+Open `https://localhost:5000` in your desktop browser, or `https://<your-ip>:5000` on your mobile device (connected to the same Wi-Fi).
 
 ---
 

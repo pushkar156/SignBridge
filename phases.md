@@ -6,25 +6,25 @@ This directory contains detailed technical specifications, workflows, architectu
 
 ## Phase Documentation Index
 
-1. **[Phase 0: Project Setup & Scope Lock](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_00_project_setup.md)**  
-   *Foundation, repository layout, data contracts, environment setup, and scope freezing.*
+1. **[Phase 0: Project Setup & Scope Lock](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_00_project_setup.md)** `[COMPLETED]`  
+   *Foundation, repository layout, data contracts, environment setup (.env), and scope freezing.*
 
-2. **[Phase 1: Dataset & ISL Recognition Foundation](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_01_dataset_recognition.md)**  
-   *Kaggle ISL 35-class dataset (A-Z, 1-9), MediaPipe hand cropping, adaptation of open-source pretrained pipeline (BRO-CODES-HERE), and character-level classifier.*
+2. **[Phase 1: Dataset & ISL Recognition Foundation](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_01_dataset_recognition.md)** `[IN PROGRESS - Milestone 1 MVP Done]`  
+   *84-landmark extractor, custom DNN model (99.84% test acc), 35-class ISL recognition. Milestone 2: Full dataset, real-world data, neutral class, geometric angles.*
 
-3. **[Phase 2: Camera & Computer Vision Pipeline](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_02_camera_cv_pipeline.md)**  
-   *Webcam stream, MediaPipe Hands integration, CLAHE low-light pre-filter, and confidence UI indicators.*
+3. **[Phase 2: Camera & Computer Vision Pipeline](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_02_camera_cv_pipeline.md)** `[IN PROGRESS - Functional]`  
+   *Webcam stream, MediaPipe Tasks API hand detection, two-hand bounding box cropping, and HTTPS mobile streaming.*
 
-4. **[Phase 3: Sequence Construction](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_03_sequence_construction.md)**  
-   *Hold-to-Confirm prediction stabilization, duplicate character suppression, 1.2s pause-based word boundary detection, character buffer, and word assembly.*
+4. **[Phase 3: Sequence Construction](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_03_sequence_construction.md)** `[IN PROGRESS - Functional]`  
+   *Hold-to-Confirm prediction stabilization, character buffer, debounce timers, and clear/space actions.*
 
-5. **[Phase 4: AI Language Processing (AI Framing System)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_04_ai_language_processing.md)**  
-   *LLM prompt engineering, sentence reconstruction, hallucination guardrails, and zero-network fallbacks.*
+5. **[Phase 4: AI Language Processing (AI Framing System)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_04_ai_language_processing.md)** `[IN PROGRESS - Functional]`  
+   *Gemini 1.5 Flash `/api/suggest` endpoint, automatic grammar correction, live UI suggestion card, and fallback handling.*
 
-6. **[Phase 5: Multilingual Output (English, Hindi, Marathi)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_05_multilingual_output.md)**  
+6. **[Phase 5: Multilingual Output (English, Hindi, Marathi)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_05_multilingual_output.md)** `[PLANNED]`  
    *Multi-target regional language translation, Devanagari Unicode rendering, and dynamic language switching.*
 
-7. **[Phase 6: Core Communication MVP Integration](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_06_core_communication_mvp.md)**  
+7. **[Phase 6: Core Communication MVP Integration](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_06_core_communication_mvp.md)** `[PLANNED]`  
    *Full integration of camera recognition (ISL → Text) and controlled phrase Avatar player (Text → ISL Avatar) into a unified two-way screen.*
 
 8. **[Phase 7: Healthcare Service Workflow & QR Entry](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_07_healthcare_service_workflow.md)**  

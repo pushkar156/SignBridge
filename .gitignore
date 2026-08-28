@@ -1,16 +1,32 @@
-# Environment & Temporary Files
+# Environment & Secrets
 .env
 .env.local
 *.env
+!.env.example
+
+# Dependencies & Build Outputs
+node_modules/
+dist/
+.vite/
 __pycache__/
+*.pyc
 venv/
 .venv/
-node_modules/
 .DS_Store
 Thumbs.db
 
-# Heavy Datasets & Model Cache
+# Old Frontend (Preserved locally, excluded from GitHub)
+backend/templates/
+templates/
+bros model/templates/
+
+# Datasets & Heavy Training Data
 Dataset/
-maitree model/
+src/ml_pipeline/dataset.csv
+*.csv
+keypoint.csv
+
+# Legacy / Scratch Experiment Directories
 bros model/
-docs/
+maitree model/
+Phases/
