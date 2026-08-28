@@ -14,10 +14,12 @@ from mediapipe.tasks.python.vision import (
     RunningMode,
 )
 
-DATASET_DIR = "../Dataset/English"
-CSV_PATH = "dataset.csv"
-# The model downloaded earlier in the bros model directory
-MODEL_ASSET_PATH = "../bros model/models/hand_landmarker.task"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+
+DATASET_DIR = os.path.join(PROJECT_ROOT, "Dataset", "English")
+CSV_PATH = os.path.join(SCRIPT_DIR, "dataset.csv")
+MODEL_ASSET_PATH = os.path.join(PROJECT_ROOT, "src", "models", "hand_landmarker.task")
 
 # Classes: digits 1-9 then A-Z  (35 classes)
 CLASSES = [str(i) for i in range(1, 10)] + list(string.ascii_uppercase)
@@ -121,7 +123,8 @@ def main():
                 print(f"Warning: Directory not found - {class_dir}")
                 continue
                 
-            images = [img for img in os.listdir(class_dir) if img.endswith(('.jpg', '.png'))][:250]
+            # Process all images in the class folder (~1,200 per class)
+            images = [img for img in os.listdir(class_dir) if img.endswith(('.jpg', '.png'))]
             print(f"Processing class '{class_name}' ({len(images)} images)...")
             
             for img_name in tqdm(images, desc=class_name, leave=False):

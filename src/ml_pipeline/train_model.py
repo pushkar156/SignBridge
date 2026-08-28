@@ -9,8 +9,9 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
-CSV_PATH = "dataset.csv"
-MODEL_SAVE_PATH = "signbridge_model_v1.h5"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH = os.path.join(SCRIPT_DIR, "dataset.csv")
+MODEL_SAVE_PATH = os.path.join(SCRIPT_DIR, "signbridge_model_v1.h5")
 
 # 35 Classes
 CLASSES = [str(i) for i in range(1, 10)] + list(string.ascii_uppercase)
