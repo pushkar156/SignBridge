@@ -1,22 +1,32 @@
-# Environment & Temporary Files
+# Environment & Secrets
 .env
 .env.local
 *.env
+!.env.example
+
+# Dependencies & Build Outputs
+node_modules/
+dist/
+.vite/
 __pycache__/
+*.pyc
 venv/
 .venv/
-node_modules/
 .DS_Store
 Thumbs.db
 
-# Explicitly Ignored Project Files & Folders
+# Old Frontend (Preserved locally, excluded from GitHub)
+backend/templates/
+templates/
+bros model/templates/
+
+# Datasets & Heavy Training Data
 Dataset/
-ISL english Dataset/
+src/ml_pipeline/dataset.csv
+*.csv
+keypoint.csv
+
+# Legacy / Scratch Experiment Directories
+bros model/
 maitree model/
-important.md
-SignBridge_India_MVP_PRD.md
-SignBridge_India_Phase_Structure.md
-SignBridge_India_Repo_Structure.md
-docs/
-phases/
 Phases/

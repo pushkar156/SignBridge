@@ -13,14 +13,14 @@
 
 **SignBridge India** bridges the communication barrier between Indian Sign Language (ISL) users and frontline public-service employees (doctors, nurses, receptionists, clerks). 
 
-The immediate MVP focuses on a real-time, low-latency communication pipeline:
+The immediate MVP focuses on a real-time, low-latency **two-way communication bridge**:
 
 ```
-[ ISL Gesture ] ──> [ Computer Vision / MediaPipe ] ──> [ Lightweight Neural Model ]
-                                                                 │
-                                                                 ▼
-[ Multilingual Output ] <── [ AI Framing System (LLM) ] <── [ Sequence Buffer ]
-(English / Hindi / Marathi)     ("I need help.")            ("I" → "NEED" → "HELP")
+Direction A: ISL → Multilingual Text (Primary)
+[ ISL Gesture ] ──> [ MediaPipe Keypoints (84) ] ──> [ MLP Landmark Model (35 classes) ] ──> [ Hold-to-Confirm ] ──> [ Word Buffer ] ──> [ LLM Framing ] ──> [ EN / HI / MR Text ]
+
+Direction B: Text → ISL Avatar (Reverse)
+[ Non-ISL Staff ] ──> [ Type / Quick Button ] ──> [ Phrase Mapping ] ──> [ Animated ISL Avatar ] ──> [ ISL User ]
 ```
 
 Beyond real-time gesture recognition, SignBridge provides a complete **institutional accessibility ecosystem** combining point-of-service QR access, bite-sized ISL staff training, and an institutional readiness dashboard.
@@ -56,7 +56,7 @@ SignBridge combines three complementary layers:
 └────────────────────────────────────────────────────────┘
 ```
 
-1. **Layer 1 (Communication Engine)**: Real-time 84-keypoint landmark extraction + neural classifier + AI framing system.
+1. **Layer 1 (Communication Engine)**: Real-time 84-keypoint landmark extraction + neural classifier + AI framing system (ISL → Text) AND controlled phrase mapping + animated ISL Avatar (Text → ISL).
 2. **Layer 2 (Capability Building)**: 3-minute healthcare-specific ISL lessons with live camera gesture scoring.
 3. **Layer 3 (Institutional Platform)**: QR standees, staff progress tracking, and Institutional Readiness Scores ($0-100$).
 
@@ -68,23 +68,30 @@ SignBridge combines three complementary layers:
    - Captures 21 3D joint landmarks per hand ($2 \times 21 \times 2 = 84$ normalized coordinates) to support complex two-handed ISL healthcare signs (`HELP`, `NEED`, `DOCTOR`).
 2. **Lightweight Model & Overfitting Mitigation**:
    - Uses an optimized ~15,000 parameter MLP classifier (<100 KB file size) trained with subject-based data splitting to prevent frame-leakage overfitting.
-3. **Low-End Mobile & Progressive Web App (PWA)**:
-   - Runs client-side via WebAssembly (WASM) and ONNX Web at **25–30 FPS on $100 budget Android smartphones**.
-   - Zero video streaming over internet—camera frames are processed locally on device for privacy and low 3G bandwidth usage.
+3. **Low-End Mobile Deployment (Current MVP Server-Side)**:
+   - Users access the web app instantly via Chrome/Safari by scanning a QR code.
+   - For the MVP, mobile devices capture frames and send them as lightweight base64 payloads to the Python backend (`app.py`), where MediaPipe and the custom `.h5` model run inference. This avoids heavy client-side downloads while maintaining low latency.
 4. **Point-of-Service QR Standee Access**:
    - Patients scan a counter QR standee (like Google Pay UPI) to instantly open SignBridge with location context (*"KEM Hospital OPD Desk 1"*) without downloading an app.
 5. **Confidence Filtering & Retry Handling**:
    - Predictions with confidence $\ge 0.75$ commit to the sequence buffer; predictions $< 0.75$ trigger a polite UI prompt requesting gesture clarification (FR-05).
+6. **Two-Way Communication & Avatar Independence**:
+   - Direction A (ISL → Text) and Direction B (Text → Avatar) are separate, independent pipelines.
+   - Avatar uses Level 1/2 predefined, validated ISL gesture animations (`PLEASE`, `WAIT`, `HERE`, `GO`, `REGISTRATION`) to ensure 100% linguistic accuracy without hallucinating signs.
+7. **Character-Level Classification & Temporal Stabilization**:
+   - ML model classifies 35 Kaggle ISL character classes (`A-Z`, `1-9`).
+   - Uses **Hold-to-Confirm** stabilization (consecutive frame agreement) to suppress duplicate character streams.
+   - **Pause-Based Word Boundary**: A 1.0s–1.5s idle pause automatically inserts a word boundary space (`HELP` + [pause] + `I` + [pause] + `NEED`).
 
 ---
 
 ## 5. Technology Stack
 
-- **Frontend**: Mobile-First Progressive Web App (React / Next.js, HTML5 Camera API, Tailwind CSS, Noto Sans Devanagari fonts).
-- **Computer Vision**: MediaPipe Hands JS (WebAssembly / WebGL runtime, CLAHE low-light pre-filter).
-- **Machine Learning**: Python 3.11, TensorFlow / Keras, ONNX Runtime Web, Scikit-learn.
-- **Backend API**: Python FastAPI / Uvicorn (Fast REST API endpoints, Pydantic validation).
-- **AI Framing System**: LLM Prompt Processing (Gemini API / Local NLP models) for ISL gloss-to-sentence reconstruction.
+- **Frontend**: Lightweight HTML/JS templates served by Flask (HTML5 Camera API, simple UI).
+- **Computer Vision**: MediaPipe Hands Tasks API (Python Server-side extraction of 84 landmarks).
+- **Machine Learning**: Python 3.11, TensorFlow / Keras (Custom lightweight MLP model).
+- **Backend API**: Python Flask (`app.py`) for handling base64 image streams, model inference, and AI sentence framing.
+- **AI Brain**: Gemini API (`gemini-1.5-flash`) for intelligent ISL gloss-to-sentence reconstruction.
 - **Database**: SQLite / PostgreSQL (SQLAlchemy ORM for institutions, staff progress, and analytics).
 
 ---
@@ -100,14 +107,14 @@ signbridge-india/
 ├── frontend/                 # React/Next.js Web Application
 │   ├── public/               # Static assets & PWA manifest
 │   └── src/
-│       ├── components/       # UI components (camera, sequence, language, dashboard)
+│       ├── components/       # UI components (camera, sequence, language, avatar, dashboard)
 │       ├── pages/            # Page views (Home, Communication, Learning, Dashboard)
-│       └── services/         # API, ML inference, and language framing adapters
+│       └── services/         # API, ML inference, avatar player, and language framing adapters
 │
 ├── backend/                  # FastAPI Application
 │   └── app/
-│       ├── api/routes/       # API endpoints (recognition, language, institutions)
-│       ├── services/         # Business & AI framing logic
+│       ├── api/routes/       # API endpoints (recognition, language, avatar, institutions)
+│       ├── services/         # Business, AI framing & avatar phrase logic
 │       └── models/           # Database schemas
 │
 ├── ml/                       # Machine Learning Pipeline
@@ -117,7 +124,8 @@ signbridge-india/
 │   └── models/               # Exported ONNX and Keras models
 │
 ├── data/                     # Metadata & Class Maps
-│   └── class_map/labels.json # Locked MVP class dictionary
+│   ├── class_map/labels.json # Locked MVP class dictionary
+│   └── isl_phrases/          # Predefined healthcare phrase & sign sequence maps
 │
 ├── phases/                   # Detailed Phase Documentation (Phase 0 to Phase 12)
 │   ├── README.md             # Phase directory index
@@ -143,9 +151,9 @@ cd signbridge-india
 cp .env.example .env
 ```
 
-### 2. Backend Setup
+### 2. App Setup & Run
 ```bash
-cd backend
+cd src
 python -m venv venv
 # Windows:
 .\venv\Scripts\activate
@@ -153,16 +161,9 @@ python -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python app.py
 ```
-
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Open `http://localhost:3000` in your browser.
+Open `https://localhost:5000` in your desktop browser, or `https://<your-ip>:5000` on your mobile device (connected to the same Wi-Fi).
 
 ---
 
@@ -184,6 +185,7 @@ Open `http://localhost:3000` in your browser.
 
 To ensure rapid MVP validation, SignBridge explicitly avoids:
 - Unrestricted continuous translation of the complete 10,000+ ISL dictionary.
+- Unrestricted free-form natural language to continuous 3D ISL avatar generation (fake/hallucinated signs).
 - Dependency on Speech-to-Text or Text-to-Speech for initial MVP.
 - Position as a replacement for certified human ISL interpreters in clinical/medical diagnosis.
 - Payment, subscription, or monetization features during pilot.

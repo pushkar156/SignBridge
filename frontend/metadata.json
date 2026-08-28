@@ -1,0 +1,10 @@
+{
+  "name": "SignBridge India",
+  "description": "AI-assisted Indian Sign Language recognition system bridging communication between ISL signers and non-signers.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
