@@ -75,12 +75,23 @@ ipconfig
 ```
 Look for **`IPv4 Address`** under your active Wi-Fi adapter (e.g., `10.254.221.109` or `192.168.1.5`).
 
-### Step 3: Open Link on Mobile Browser
-On your mobile phone browser (Chrome or Safari), open:
+### Step 3: Open HTTPS Link on Mobile Browser
+Mobile browsers (Chrome / Safari) **require an HTTPS origin** to grant camera permissions (`getUserMedia`). 
+
+On your mobile phone browser, open:
 ```text
-http://<YOUR_LAPTOP_IP>:3000
+https://<YOUR_LAPTOP_IP>:3000
 ```
-*(Example: `http://10.254.221.109:3000`)*
+*(Example: `https://10.254.221.109:3000`)*
+
+---
+
+### Step 4: Accept the 1-Time Local SSL Warning on Mobile
+Because the dev server uses a local self-signed SSL certificate:
+1. When your phone opens `https://10.254.221.109:3000`, Chrome/Safari will display a security warning: *"Your connection is not private"* or *"Site Security Warning"*.
+2. Tap **Advanced** (or *Show Details*).
+3. Tap **Proceed to 10.254.221.109 (unsafe)** or **Visit this website**.
+4. Tap **Turn On Camera** and grant camera permissions! 🎥
 
 ---
 
