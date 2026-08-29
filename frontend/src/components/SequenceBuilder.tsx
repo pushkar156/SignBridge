@@ -38,7 +38,7 @@ export const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
   return (
     <div 
       id="sequence-builder-card"
-      className="bg-white dark:bg-[#19221D] rounded-3xl p-6 shadow-sm border border-stone-200/90 dark:border-[#283830] space-y-4"
+      className="bg-white dark:bg-[#19221D] rounded-3xl p-4 sm:p-5 shadow-sm border border-stone-200/90 dark:border-[#283830] space-y-3"
     >
       {/* Header with Title and Mode Toggle */}
       <div className="flex items-center justify-between border-b border-stone-100 dark:border-[#283830] pb-3">
