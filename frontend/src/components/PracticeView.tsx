@@ -194,15 +194,15 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               <p className="text-xs text-[#6E756F] dark:text-[#9FB0A7] mt-0.5">Show the corresponding ISL gesture in front of the camera.</p>
             </div>
 
-            {/* Dataset 0.jpg Sample Demonstration Image */}
+            {/* Demonstration Gesture Reference Image */}
             <div className="bg-stone-900 rounded-2xl p-2 border border-stone-800 text-center flex flex-col items-center justify-center relative overflow-hidden">
               <img 
                 src={`/dataset_samples/${currentTarget.label}.jpg`} 
-                alt={`ISL Dataset 0.jpg Sample for ${currentTarget.label}`}
+                alt={`ISL Gesture Reference for ${currentTarget.label}`}
                 className="w-full h-44 object-contain rounded-xl bg-stone-950"
               />
               <div className="mt-1.5 flex items-center justify-between w-full px-2 text-[10px] text-stone-300 font-mono">
-                <span className="font-bold text-emerald-400">0.jpg Dataset Reference</span>
+                <span className="font-bold text-emerald-400">Gesture Reference</span>
                 <span>Class: {currentTarget.label}</span>
               </div>
             </div>

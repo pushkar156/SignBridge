@@ -128,16 +128,13 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
                 {sign.name}
               </h3>
 
-              {/* Dataset 0.jpg Sample Demonstration Image */}
-              <div className="my-3 bg-stone-900 rounded-2xl overflow-hidden border border-stone-800 flex flex-col items-center justify-center p-1 relative shadow-inner">
+              {/* Demonstration Gesture Image */}
+              <div className="my-3 bg-stone-900 rounded-2xl overflow-hidden border border-stone-800 flex items-center justify-center p-1 shadow-inner">
                 <img 
                   src={`/dataset_samples/${sign.label}.jpg`} 
-                  alt={`ISL Dataset 0.jpg Sample for ${sign.label}`}
+                  alt={`ISL Gesture for ${sign.label}`}
                   className="w-full h-36 object-contain rounded-xl bg-stone-950"
                 />
-                <span className="absolute bottom-1.5 right-2 text-[9px] font-mono font-bold bg-black/70 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/30">
-                  0.jpg Dataset
-                </span>
               </div>
 
               {/* Hand Shape Guidance Description */}
@@ -195,16 +192,16 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
               </button>
             </div>
 
-            {/* Demonstration Media Dataset Image */}
+            {/* Demonstration Media Gesture Image */}
             <div className="bg-stone-900 rounded-2xl p-2 border border-stone-800 text-center flex flex-col items-center justify-center relative">
               <img 
                 src={`/dataset_samples/${selectedClass.label}.jpg`} 
-                alt={`ISL Dataset 0.jpg Sample for ${selectedClass.label}`}
+                alt={`ISL Gesture for ${selectedClass.label}`}
                 className="w-full h-52 object-contain rounded-xl bg-stone-950"
               />
               <span className="mt-2 text-[11px] font-bold text-stone-300 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>Dataset Sample Reference (0.jpg) for Class {selectedClass.label}</span>
+                <span>Gesture Reference for Sign {selectedClass.label}</span>
               </span>
             </div>
 
