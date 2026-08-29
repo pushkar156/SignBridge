@@ -61,23 +61,42 @@ npm run dev
 
 ---
 
-## 📱 4. Mobile Setup (Same Wi-Fi / Hotspot)
+## 📱 4. Mobile Access Guide (Step-by-Step)
 
-To access SignBridge on your mobile phone:
+Follow these steps to open SignBridge on your mobile smartphone:
 
-1. Connect your phone and laptop to the **same Wi-Fi network** or **mobile hotspot**.
-2. Find your laptop's IPv4 address:
-   ```powershell
-   ipconfig
-   ```
-   *(Look for `IPv4 Address` under Wi-Fi, e.g. `10.254.221.109` or `192.168.1.5`).*
-3. Open your mobile browser and go to:
-   ```text
-   http://<YOUR_LAPTOP_IP>:3000
-   ```
-   *(Example: `http://10.254.221.109:3000`)*
+### Step 1: Connect Both Devices to Same Network
+* Turn on your Mobile Hotspot and connect your laptop to it, **OR** connect both laptop and mobile to the same Wi-Fi router.
 
-> ⚠️ **Windows Firewall Note:** If your phone says *"Site can't be reached"*, change your Wi-Fi profile from **Public** to **Private** in *Windows Settings → Network & Internet → Wi-Fi*, or allow ports `3000` & `5000` through Windows Firewall.
+### Step 2: Find Your Laptop's IP Address
+Open PowerShell on your laptop and run:
+```powershell
+ipconfig
+```
+Look for **`IPv4 Address`** under your active Wi-Fi adapter (e.g., `10.254.221.109` or `192.168.1.5`).
+
+### Step 3: Open Link on Mobile Browser
+On your mobile phone browser (Chrome or Safari), open:
+```text
+http://<YOUR_LAPTOP_IP>:3000
+```
+*(Example: `http://10.254.221.109:3000`)*
+
+---
+
+### ⚠️ Troubleshooting: If Phone Says *"Site can't be reached"*
+Windows blocks incoming network connections on Public Wi-Fi profiles by default. Fix it in 15 seconds:
+
+* **Fix Option A (Easiest):**
+  1. Open laptop **Settings** (`Win + I`) → **Network & Internet** → **Wi-Fi**.
+  2. Click your mobile hotspot network.
+  3. Change *Network Profile Type* from **Public Network** to **Private Network**.
+
+* **Fix Option B (Firewall App Permission):**
+  1. Open Windows Search → Type **"Allow an app through Windows Firewall"**.
+  2. Click **Change settings** → Find **Node.js** and **Python** → Check both **Private** and **Public** boxes → Click **OK**.
+
+Refresh your mobile browser, tap **Turn On Camera**, and test live gesture translation!
 
 ---
 
