@@ -18,6 +18,14 @@ interface CameraPreviewProps {
   lastPrediction: PredictionResponse | null;
   backendStatus: BackendConnectionStatus;
   onOpenBackendModal: () => void;
+  sequence?: string[];
+  stabilityScore?: number;
+  currentPendingSign?: string | null;
+  onUndo?: () => void;
+  onClear?: () => void;
+  onAddSpace?: () => void;
+  onRequestAISuggestion?: () => void;
+  isSuggesting?: boolean;
 }
 
 export const CameraPreview: React.FC<CameraPreviewProps> = ({
@@ -26,6 +34,14 @@ export const CameraPreview: React.FC<CameraPreviewProps> = ({
   lastPrediction,
   backendStatus,
   onOpenBackendModal,
+  sequence = [],
+  stabilityScore = 0,
+  currentPendingSign = null,
+  onUndo,
+  onClear,
+  onAddSpace,
+  onRequestAISuggestion,
+  isSuggesting = false,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -338,6 +354,77 @@ export const CameraPreview: React.FC<CameraPreviewProps> = ({
             isActive ? 'opacity-100' : 'opacity-0'
           } ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
         />
+
+        {/* HUD Overlay: Live Detecting Letter Badge (Top Right of Video) */}
+        {isActive && lastPrediction && lastPrediction.label !== '?' && !hasNoHand && (
+          <div className="absolute top-3 right-3 z-30 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 text-white shadow-lg animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] uppercase font-bold text-emerald-400 tracking-wider">Detecting</span>
+              <span className="text-xl font-black font-mono leading-none text-white">{lastPrediction.label}</span>
+            </div>
+            <div className="h-6 w-px bg-white/20" />
+            <div className="text-[10px] font-semibold text-stone-300 flex flex-col">
+              <span className="text-emerald-400 font-bold">{Math.round((lastPrediction.confidence || 0) * 100)}% Match</span>
+              {stabilityScore > 0 && (
+                <span className="text-[9px] text-amber-300">Holding: {stabilityScore}%</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* HUD Overlay: Live Accumulated Sequence Bar (Bottom of Video) */}
+        {isActive && sequence.length > 0 && (
+          <div className="absolute bottom-3 inset-x-3 z-30 bg-black/75 backdrop-blur-md p-2.5 rounded-2xl border border-white/20 text-white shadow-xl flex items-center justify-between gap-2 overflow-x-auto animate-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center gap-1.5 font-mono overflow-x-auto">
+              <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-emerald-400 shrink-0 mr-1">
+                Sequence:
+              </span>
+              {sequence.map((char, idx) => (
+                <span
+                  key={`hud-${char}-${idx}`}
+                  className={`inline-flex items-center justify-center px-2 py-0.5 rounded-lg text-sm font-black ${
+                    char === ' '
+                      ? 'bg-white/20 text-stone-300 min-w-[18px]'
+                      : 'bg-emerald-500 text-black shadow-xs'
+                  }`}
+                >
+                  {char === ' ' ? '␣' : char}
+                </span>
+              ))}
+            </div>
+
+            {/* Quick Actions inside HUD Bar */}
+            <div className="flex items-center gap-1 shrink-0">
+              {onUndo && (
+                <button
+                  onClick={onUndo}
+                  className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-stone-200 transition-colors"
+                  title="Undo last sign"
+                >
+                  Undo
+                </button>
+              )}
+              {onAddSpace && (
+                <button
+                  onClick={onAddSpace}
+                  className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-stone-200 transition-colors"
+                  title="Add space"
+                >
+                  Space
+                </button>
+              )}
+              {onClear && (
+                <button
+                  onClick={onClear}
+                  className="px-2 py-1 rounded-lg bg-rose-500/30 hover:bg-rose-500/50 text-[10px] font-bold text-rose-200 transition-colors"
+                  title="Clear all"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Camera Inactive State */}
         {!isActive && !error && (

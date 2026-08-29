@@ -276,6 +276,14 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
             lastPrediction={prediction}
             backendStatus={backendStatus}
             onOpenBackendModal={onOpenBackendModal}
+            sequence={sequence}
+            stabilityScore={stabilityScore}
+            currentPendingSign={currentPendingSign}
+            onUndo={handleUndo}
+            onClear={handleClear}
+            onAddSpace={handleAddSpace}
+            onRequestAISuggestion={handleSuggestSentence}
+            isSuggesting={isSuggesting}
           />
 
           {/* Quick helpful gesture hint banner */}
