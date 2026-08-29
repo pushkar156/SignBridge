@@ -44,7 +44,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'live', label: 'Live Communicator', icon: <Camera className="w-4 h-4" /> },
     { id: 'learn', label: 'Learn ISL', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'practice', label: 'Practice', icon: <Target className="w-4 h-4" /> },
-    { id: 'about', label: 'About & API', icon: <Info className="w-4 h-4" /> },
+    { id: 'about', label: 'About', icon: <Info className="w-4 h-4" /> },
   ];
 
   const handleNavClick = (view: AppView) => {

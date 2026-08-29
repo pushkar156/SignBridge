@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   HeartHandshake, 
-  Code2, 
   ShieldCheck, 
   Sparkles, 
   Building2, 
@@ -141,57 +140,6 @@ export const AboutView: React.FC = () => {
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Backend API Contract & Verification */}
-      <div className="bg-[#183D32] dark:bg-[#132019] text-white rounded-3xl p-6 sm:p-8 space-y-5 border border-transparent dark:border-[#283830]">
-        <div className="flex items-center justify-between border-b border-[#2F6B57] dark:border-[#283830] pb-4">
-          <div className="flex items-center gap-2.5">
-            <Code2 className="w-5 h-5 text-[#D69A4A] dark:text-[#FBA65B]" />
-            <h3 className="font-bold text-base">Backend API Specification</h3>
-          </div>
-          <span className="text-xs font-mono text-[#D69A4A] dark:text-[#FBA65B] bg-black/30 px-2.5 py-1 rounded-full border border-[#D69A4A]/30">
-            Flask v3.x + CORS
-          </span>
-        </div>
-
-        <div className="space-y-4 text-xs font-mono">
-          <div>
-            <div className="text-[#D5E4DC] mb-1 font-sans font-semibold">1. Predict Endpoint:</div>
-            <pre className="p-3 bg-black/40 rounded-xl overflow-x-auto text-[#F7F3EA] border border-white/10">
-{`POST /predict
-Content-Type: application/json
-
-Request:
-{ "image": "data:image/jpeg;base64,/9j/4AAQSkZJRg..." }
-
-Response:
-{
-  "label": "A",
-  "confidence": 0.94,
-  "top3": [
-    { "label": "A", "conf": 0.94 },
-    { "label": "S", "conf": 0.03 },
-    { "label": "E", "conf": 0.02 }
-  ]
-}`}
-            </pre>
-          </div>
-
-          <div>
-            <div className="text-[#D5E4DC] mb-1 font-sans font-semibold">2. Sentence Suggestion Endpoint:</div>
-            <pre className="p-3 bg-black/40 rounded-xl overflow-x-auto text-[#F7F3EA] border border-white/10">
-{`POST /api/suggest
-Content-Type: application/json
-
-Request:
-{ "text": "H E L L O" }
-
-Response:
-{ "suggested": "Hello, how can I help you today?" }`}
-            </pre>
-          </div>
         </div>
       </div>
 
