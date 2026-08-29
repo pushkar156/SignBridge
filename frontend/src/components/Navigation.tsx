@@ -121,8 +121,8 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1" aria-label="Main Navigation">
+          {/* Desktop Navigation Links (Sleek Glassmorphic Pill Bar) */}
+          <nav className="hidden md:flex items-center p-1 bg-[#F5F8F6] dark:bg-[#131B16] rounded-2xl border border-stone-200/60 dark:border-[#243329]" aria-label="Main Navigation">
             {navItems.map((item) => {
               const isActive = currentView === item.id;
               return (
@@ -131,16 +131,16 @@ export const Navigation: React.FC<NavigationProps> = ({
                   id={`nav-link-${item.id}`}
                   onClick={() => handleNavClick(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  className={`relative flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#183D32] text-white shadow-xs dark:bg-[#2A4D3E] dark:text-[#F0FAF4]'
-                      : 'text-[#6D756F] dark:text-[#9AA8A0] hover:text-[#183D32] dark:hover:text-white hover:bg-[#E8F0EC]/60 dark:hover:bg-[#202C25]'
+                      ? 'bg-[#183D32] text-white shadow-sm dark:bg-[#255746] dark:text-white'
+                      : 'text-stone-600 dark:text-[#9FB0A7] hover:text-[#183D32] dark:hover:text-white hover:bg-white/60 dark:hover:bg-[#1E2A23]'
                   }`}
                 >
                   {item.icon}
                   <span>{item.label}</span>
                   {item.id === 'live' && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   )}
                 </button>
               );
@@ -149,20 +149,12 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Right Action Controls */}
           <div className="flex items-center space-x-2">
-            {/* View Mode Badge */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-[#E8F0EC] dark:bg-[#1E2E25] rounded-full border border-transparent dark:border-[#2C4235]">
-              <div className="w-2 h-2 bg-[#2F6B57] dark:bg-[#4ADE80] rounded-full" />
-              <span className="text-xs font-bold text-[#2F6B57] dark:text-[#76CBA6] uppercase tracking-wider">
-                {currentView === 'live' ? 'Live Communicator' : currentView.toUpperCase()}
-              </span>
-            </div>
-
             {/* Backend Status Pill */}
             <button
               id="btn-backend-status"
               onClick={onOpenBackendModal}
               title="Click to check or configure Python Flask backend connection"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-stone-50 dark:bg-[#1E2822] border border-stone-200 dark:border-[#2D3C33] text-[#202522] dark:text-[#E2EAE5] hover:bg-[#E8F0EC]/70 dark:hover:bg-[#283830] transition-colors focus:outline-none focus:ring-2 focus:ring-[#183D32]"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#F5F8F6] dark:bg-[#131B16] border border-stone-200/60 dark:border-[#243329] text-stone-700 dark:text-[#E2EAE5] hover:bg-[#E8F0EC] dark:hover:bg-[#1C2821] transition-colors focus:outline-none focus:ring-2 focus:ring-[#183D32]"
               aria-label={`Backend status: ${backendStatus}. Click to configure connection`}
             >
               <span className="relative flex h-2 w-2">
@@ -177,15 +169,12 @@ export const Navigation: React.FC<NavigationProps> = ({
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                 )}
               </span>
-              <span className="hidden sm:inline text-[#6D756F] dark:text-[#A0B0A7]">
+              <span className="hidden sm:inline text-stone-600 dark:text-[#9FB0A7]">
                 {backendStatus === 'connected'
-                  ? 'Backend: Connected'
+                  ? 'Backend Ready'
                   : backendStatus === 'checking'
                   ? 'Testing API...'
-                  : 'Backend: Offline'}
-              </span>
-              <span className="sm:hidden text-[#6D756F] dark:text-[#A0B0A7]">
-                {backendStatus === 'connected' ? 'Connected' : 'Offline'}
+                  : 'Backend Offline'}
               </span>
               <Settings className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
             </button>
@@ -194,7 +183,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               id="btn-theme-toggle"
               onClick={toggleDarkMode}
-              className="p-2 rounded-xl text-stone-600 dark:text-[#A0B0A7] bg-stone-50 dark:bg-[#1E2822] border border-stone-200 dark:border-[#2D3C33] hover:bg-[#E8F0EC] dark:hover:bg-[#283830] hover:text-[#183D32] dark:hover:text-[#FBA65B] transition-colors focus:outline-none focus:ring-2 focus:ring-[#183D32]"
+              className="p-2 rounded-xl text-stone-600 dark:text-[#A0B0A7] bg-[#F5F8F6] dark:bg-[#131B16] border border-stone-200/60 dark:border-[#243329] hover:bg-[#E8F0EC] dark:hover:bg-[#1C2821] hover:text-[#183D32] dark:hover:text-[#FBA65B] transition-colors focus:outline-none focus:ring-2 focus:ring-[#183D32]"
               title={accessibility.darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label={accessibility.darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
