@@ -128,16 +128,15 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
                 {sign.name}
               </h3>
 
-              {/* Verified Demonstration Placeholder */}
-              <div className="my-3 bg-[#FAF8F3] dark:bg-[#141C18] rounded-2xl p-3.5 border border-[#E8E2D2] dark:border-[#283830] text-center flex flex-col items-center justify-center min-h-[95px] relative overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-stone-200 dark:bg-[#202E26] text-[#4F765E] dark:text-[#76CBA6] flex items-center justify-center mb-1">
-                  <Hand className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-[#183D32] dark:text-[#76CBA6]">
-                  ISL demonstration media
-                </span>
-                <span className="text-[9px] text-stone-400 dark:text-[#9FB0A7]">
-                  Verified gesture guidance
+              {/* Dataset 0.jpg Sample Demonstration Image */}
+              <div className="my-3 bg-stone-900 rounded-2xl overflow-hidden border border-stone-800 flex flex-col items-center justify-center p-1 relative shadow-inner">
+                <img 
+                  src={`/dataset_samples/${sign.label}.jpg`} 
+                  alt={`ISL Dataset 0.jpg Sample for ${sign.label}`}
+                  className="w-full h-36 object-contain rounded-xl bg-stone-950"
+                />
+                <span className="absolute bottom-1.5 right-2 text-[9px] font-mono font-bold bg-black/70 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/30">
+                  0.jpg Dataset
                 </span>
               </div>
 
@@ -196,15 +195,17 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
               </button>
             </div>
 
-            {/* Demonstration Media Placeholder Box */}
-            <div className="bg-[#FAF8F3] dark:bg-[#141C18] rounded-2xl p-6 border border-[#E8E2D2] dark:border-[#283830] text-center">
-              <Hand className="w-12 h-12 text-[#4F765E] dark:text-[#76CBA6] mx-auto mb-2" />
-              <div className="text-sm font-bold text-[#183D32] dark:text-[#76CBA6]">
-                ISL demonstration media
-              </div>
-              <p className="text-xs text-[#6E756F] dark:text-[#9FB0A7] mt-1 max-w-xs mx-auto">
-                Verified Indian Sign Language gesture standard for {selectedClass.name}.
-              </p>
+            {/* Demonstration Media Dataset Image */}
+            <div className="bg-stone-900 rounded-2xl p-2 border border-stone-800 text-center flex flex-col items-center justify-center relative">
+              <img 
+                src={`/dataset_samples/${selectedClass.label}.jpg`} 
+                alt={`ISL Dataset 0.jpg Sample for ${selectedClass.label}`}
+                className="w-full h-52 object-contain rounded-xl bg-stone-950"
+              />
+              <span className="mt-2 text-[11px] font-bold text-stone-300 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>Dataset Sample Reference (0.jpg) for Class {selectedClass.label}</span>
+              </span>
             </div>
 
             <div className="space-y-3 text-xs">

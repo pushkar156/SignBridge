@@ -194,15 +194,17 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               <p className="text-xs text-[#6E756F] dark:text-[#9FB0A7] mt-0.5">Show the corresponding ISL gesture in front of the camera.</p>
             </div>
 
-            {/* Verified Demonstration Placeholder */}
-            <div className="bg-[#FAF8F3] dark:bg-[#141C18] rounded-2xl p-5 border border-[#E8E2D2] dark:border-[#283830] text-center">
-              <Hand className="w-10 h-10 text-[#4F765E] dark:text-[#76CBA6] mx-auto mb-1.5" />
-              <div className="text-xs font-bold text-[#183D32] dark:text-[#76CBA6]">
-                ISL demonstration media
+            {/* Dataset 0.jpg Sample Demonstration Image */}
+            <div className="bg-stone-900 rounded-2xl p-2 border border-stone-800 text-center flex flex-col items-center justify-center relative overflow-hidden">
+              <img 
+                src={`/dataset_samples/${currentTarget.label}.jpg`} 
+                alt={`ISL Dataset 0.jpg Sample for ${currentTarget.label}`}
+                className="w-full h-44 object-contain rounded-xl bg-stone-950"
+              />
+              <div className="mt-1.5 flex items-center justify-between w-full px-2 text-[10px] text-stone-300 font-mono">
+                <span className="font-bold text-emerald-400">0.jpg Dataset Reference</span>
+                <span>Class: {currentTarget.label}</span>
               </div>
-              <p className="text-[11px] text-[#6E756F] dark:text-[#9FB0A7] mt-1">
-                Verified anatomical configuration for "{currentTarget.label}"
-              </p>
             </div>
 
             {/* Tips and Instructions */}
