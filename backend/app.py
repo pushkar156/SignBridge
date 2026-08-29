@@ -38,13 +38,11 @@ from mediapipe.tasks.python.vision import (
     HandLandmarkerOptions,
     RunningMode,
 )
-from tensorflow import keras
 import string
 
 # --- Config -------------------------------------------------------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Both models are now housed directly under src/
-MAITREE_MODEL_PATH = os.path.join(SCRIPT_DIR, "ml_pipeline", "signbridge_model_v1.h5")
+NPZ_PATH = os.path.join(SCRIPT_DIR, "ml_pipeline", "signbridge_weights.npz")
 HAND_LANDMARKER_PATH = os.path.join(SCRIPT_DIR, "models", "hand_landmarker.task")
 
 # Classes: digits 1-9 then A-Z  (35 classes)
@@ -54,10 +52,32 @@ CLASS_LABELS = [str(i) for i in range(1, 10)] + list(string.ascii_uppercase)
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from Vite dev server (port 3000)
 
-# --- Load ISL classifier model ------------------------------------------------
-print("Loading custom 84-feature landmark model ...")
-model = keras.models.load_model(MAITREE_MODEL_PATH)
-print("Model loaded  (input: %s, output: %s)" % (model.input_shape, model.output_shape))
+# --- Load ISL classifier model (Ultra-lightweight Numpy Inference) -----------
+print("Loading custom 84-feature landmark model (Numpy format) ...")
+weights_data = np.load(NPZ_PATH)
+print("Numpy model weights loaded successfully (%s)" % NPZ_PATH)
+
+def relu(x):
+    return np.maximum(0, x)
+
+def softmax(x):
+    e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
+    return e_x / np.sum(e_x, axis=-1, keepdims=True)
+
+def predict_mlp(features):
+    x = np.array([features], dtype=np.float32)
+    # Layer 1
+    x = relu(np.dot(x, weights_data['dense_W']) + weights_data['dense_b'])
+    x = weights_data['batch_normalization_gamma'] * (x - weights_data['batch_normalization_mean']) / np.sqrt(weights_data['batch_normalization_var'] + weights_data['batch_normalization_eps'][0]) + weights_data['batch_normalization_beta']
+    # Layer 2
+    x = relu(np.dot(x, weights_data['dense_1_W']) + weights_data['dense_1_b'])
+    x = weights_data['batch_normalization_1_gamma'] * (x - weights_data['batch_normalization_1_mean']) / np.sqrt(weights_data['batch_normalization_1_var'] + weights_data['batch_normalization_1_eps'][0]) + weights_data['batch_normalization_1_beta']
+    # Layer 3
+    x = relu(np.dot(x, weights_data['dense_2_W']) + weights_data['dense_2_b'])
+    x = weights_data['batch_normalization_2_gamma'] * (x - weights_data['batch_normalization_2_mean']) / np.sqrt(weights_data['batch_normalization_2_var'] + weights_data['batch_normalization_2_eps'][0]) + weights_data['batch_normalization_2_beta']
+    # Layer 4 (Output Softmax)
+    x = np.dot(x, weights_data['dense_3_W']) + weights_data['dense_3_b']
+    return softmax(x)[0]
 
 # --- MediaPipe Hand Landmarker (Tasks API) ------------------------------------
 print("Loading MediaPipe HandLandmarker ...")
@@ -169,8 +189,8 @@ def process_image(img_pil):
         elif label == "Right":
             frontend_landmarks["right"] = coords
 
-    # Predict
-    probs = model.predict(df, verbose=0)[0]
+    # Predict (Numpy forward pass, ultra-lightweight)
+    probs = predict_mlp(features)
     idx = int(np.argmax(probs))
     confidence = float(probs[idx])
     label = CLASS_LABELS[idx]
