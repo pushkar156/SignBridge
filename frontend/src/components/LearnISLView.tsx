@@ -24,11 +24,18 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
   const [selectedClass, setSelectedClass] = useState<ISLClassInfo | null>(null);
 
   const filteredClasses = ISL_CLASSES.filter((item) => {
-    const matchesTab = activeTab === 'All' || item.category === activeTab;
-    const matchesSearch =
-      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = !query || (
+      item.label.toLowerCase().includes(query) ||
+      item.name.toLowerCase().includes(query) ||
+      item.description.toLowerCase().includes(query) ||
+      item.handShapeTips.toLowerCase().includes(query) ||
+      item.category.toLowerCase().includes(query) ||
+      (item.commonMistakes && item.commonMistakes.toLowerCase().includes(query))
+    );
+
+    // If active search query exists, match globally across all categories
+    const matchesTab = activeTab === 'All' || item.category === activeTab || Boolean(query);
     return matchesTab && matchesSearch;
   });
 
@@ -65,11 +72,14 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
         {/* Category Tabs */}
         <div className="flex items-center gap-1 w-full sm:w-auto bg-[#FAF8F3] dark:bg-[#131B16] p-1 rounded-xl border border-[#E8E2D2] dark:border-[#283830]">
           {(['All', 'Alphabet', 'Numbers'] as const).map((tab) => {
-            const isActive = activeTab === tab;
+            const isActive = activeTab === tab && !searchQuery.trim();
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setSearchQuery('');
+                }}
                 className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                   isActive
                     ? 'bg-white dark:bg-[#1D2821] text-[#183D32] dark:text-[#76CBA6] shadow-xs'
@@ -91,21 +101,32 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
           })}
         </div>
 
-        {/* Search Field */}
-        <div className="relative w-full sm:w-72">
+        {/* Search Field with Instant Reset Button */}
+        <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
+            id="input-learn-search"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search sign (e.g., A, 5, fist)..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-[#283830] text-xs focus:outline-none focus:ring-2 focus:ring-[#183D32] bg-[#FAF8F3] dark:bg-[#131B16] text-[#202522] dark:text-[#E2EAE5]"
+            placeholder="Search sign (e.g., A, 5, thumb, fist)..."
+            className="w-full pl-9 pr-8 py-2 rounded-xl border border-stone-200 dark:border-[#283830] text-xs focus:outline-none focus:ring-2 focus:ring-[#183D32] bg-[#FAF8F3] dark:bg-[#131B16] text-[#202522] dark:text-[#E2EAE5]"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 p-0.5 text-xs font-bold"
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
       {/* Grid of 35 ISL Sign Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      {filteredClasses.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {filteredClasses.map((sign) => (
           <div
             key={sign.id}
@@ -163,6 +184,23 @@ export const LearnISLView: React.FC<LearnISLViewProps> = ({
           </div>
         ))}
       </div>
+      ) : (
+        <div className="bg-white dark:bg-[#19221D] rounded-3xl p-12 text-center border border-stone-200 dark:border-[#283830] space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-stone-100 dark:bg-[#1D2821] text-stone-400 flex items-center justify-center mx-auto">
+            <Search className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-stone-800 dark:text-[#E2EAE5]">No ISL Signs Found</h3>
+          <p className="text-xs text-stone-500 dark:text-stone-400 max-w-sm mx-auto">
+            No supported signs match "<span className="font-semibold text-[#183D32] dark:text-[#76CBA6]">{searchQuery}</span>". Try searching for a letter (A–Z), digit (1–9), or gesture description.
+          </p>
+          <button
+            onClick={() => setSearchQuery('')}
+            className="px-4 py-2 bg-[#183D32] dark:bg-[#2F6B57] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#204E40]"
+          >
+            Clear Search
+          </button>
+        </div>
+      )}
 
       {/* Inspect Detail Modal */}
       {selectedClass && (
