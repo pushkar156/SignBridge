@@ -70,27 +70,13 @@ export const Navigation: React.FC<NavigationProps> = ({
             aria-label="SignBridge India Home"
             onKeyDown={(e) => e.key === 'Enter' && handleNavClick('dashboard')}
           >
-            {/* Custom Generated SignBridge Brand Logo */}
-            <div className="relative w-9 h-9 bg-white dark:bg-[#122D25] rounded-xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-all border border-[#2F6B57]/40 overflow-hidden">
+            {/* Custom Generated SignBridge Brand Logo Icon Only */}
+            <div className="relative w-10 h-10 bg-white dark:bg-[#122D25] rounded-xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-all border border-[#2F6B57]/40 overflow-hidden" title="SignBridge India">
               <img 
                 src="/signbridge_logo.jpg" 
                 alt="SignBridge Logo" 
                 className="w-full h-full object-cover"
               />
-            </div>
-
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-[#183D32] dark:text-[#F0F5F2]">
-                  SIGNBRIDGE <span className="font-medium text-[#E07A2B]">INDIA</span>
-                </h1>
-                {/* 3 subtle color identity pips */}
-                <div className="hidden sm:flex items-center gap-1 ml-1" aria-hidden="true">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#E07A2B]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#4F765E]" />
-                </div>
-              </div>
             </div>
           </div>
 
