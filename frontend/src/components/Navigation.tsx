@@ -70,40 +70,13 @@ export const Navigation: React.FC<NavigationProps> = ({
             aria-label="SignBridge India Home"
             onKeyDown={(e) => e.key === 'Enter' && handleNavClick('dashboard')}
           >
-            {/* Custom Modern SignBridge 'S' Logo */}
-            <div className="relative w-9 h-9 bg-gradient-to-br from-[#183D32] to-[#122D25] rounded-xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-all border border-[#2F6B57]/40 overflow-hidden">
-              {/* Subtle top saffron and bottom green trim */}
-              <div className="absolute top-0 inset-x-0 h-0.5 bg-[#E07A2B]" />
-              
-              {/* Stylized Modern S-Bridge Vector */}
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-white drop-shadow-xs"
-                aria-hidden="true"
-              >
-                <defs>
-                  <linearGradient id="sLogoGradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#FFA048" />
-                    <stop offset="50%" stopColor="#FFFFFF" />
-                    <stop offset="100%" stopColor="#86EFAC" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M17.5 7.5C17.5 5.29086 14.5 4.5 12 4.5C8 4.5 6 6.8 6 9.5C6 13.5 18 11.5 18 15.5C18 18.2 16 20 12 20C9 20 6.5 18.8 6.5 16.5"
-                  stroke="url(#sLogoGradient)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* Accent node on top saffron turn */}
-                <circle cx="17.5" cy="7.5" r="1.25" fill="#E07A2B" />
-                {/* Accent node on bottom green turn */}
-                <circle cx="6.5" cy="16.5" r="1.25" fill="#4F765E" />
-              </svg>
-
-              <div className="absolute bottom-0 inset-x-0 h-0.5 bg-[#4F765E]" />
+            {/* Custom Generated SignBridge Brand Logo */}
+            <div className="relative w-9 h-9 bg-white dark:bg-[#122D25] rounded-xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-all border border-[#2F6B57]/40 overflow-hidden">
+              <img 
+                src="/signbridge_logo.jpg" 
+                alt="SignBridge Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div>
@@ -149,34 +122,25 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Right Action Controls */}
           <div className="flex items-center space-x-2">
-            {/* Backend Status Pill */}
+            {/* Backend Settings Icon Button */}
             <button
               id="btn-backend-status"
               onClick={onOpenBackendModal}
-              title="Click to check or configure Python Flask backend connection"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#F5F8F6] dark:bg-[#131B16] border border-stone-200/60 dark:border-[#243329] text-stone-700 dark:text-[#E2EAE5] hover:bg-[#E8F0EC] dark:hover:bg-[#1C2821] transition-colors focus:outline-none focus:ring-2 focus:ring-[#183D32]"
+              title={`Backend Status: ${backendStatus}. Click to configure connection`}
+              className="relative p-2 rounded-xl text-stone-600 dark:text-[#A0B0A7] bg-[#F5F8F6] dark:bg-[#131B16] border border-stone-200/60 dark:border-[#243329] hover:bg-[#E8F0EC] dark:hover:bg-[#1C2821] hover:text-[#183D32] dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#183D32]"
               aria-label={`Backend status: ${backendStatus}. Click to configure connection`}
             >
-              <span className="relative flex h-2 w-2">
+              <Settings className="w-4 h-4" />
+              {/* Status Dot Indicator at top-right of settings icon */}
+              <span className="absolute top-1 right-1 flex h-2 w-2">
                 {backendStatus === 'connected' ? (
-                  <>
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 ring-2 ring-white dark:ring-[#131B16]"></span>
                 ) : backendStatus === 'checking' ? (
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400 animate-pulse"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400 animate-pulse ring-2 ring-white dark:ring-[#131B16]"></span>
                 ) : (
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500 ring-2 ring-white dark:ring-[#131B16]"></span>
                 )}
               </span>
-              <span className="hidden sm:inline text-stone-600 dark:text-[#9FB0A7]">
-                {backendStatus === 'connected'
-                  ? 'Backend Ready'
-                  : backendStatus === 'checking'
-                  ? 'Testing API...'
-                  : 'Backend Offline'}
-              </span>
-              <Settings className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
             </button>
 
             {/* Quick Dark Mode / Light Mode Toggle */}
