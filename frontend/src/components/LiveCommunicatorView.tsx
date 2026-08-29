@@ -10,7 +10,6 @@ import { CameraPreview } from './CameraPreview';
 import { PredictionCard } from './PredictionCard';
 import { SequenceBuilder } from './SequenceBuilder';
 import { AISuggestionCard } from './AISuggestionCard';
-import { TwoWayCommunicatorCard } from './TwoWayCommunicatorCard';
 import { 
   ArrowLeft, 
   HelpCircle, 
@@ -333,9 +332,6 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
             onSpeak={handleSpeak}
             isSpeaking={isSpeaking}
           />
-
-          {/* Two-Way Communication Card (Reverse Text-to-Sign) */}
-          <TwoWayCommunicatorCard onSpeak={handleSpeak} />
         </div>
       </div>
     </div>
