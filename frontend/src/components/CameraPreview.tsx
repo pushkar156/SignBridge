@@ -315,8 +315,8 @@ export const CameraPreview: React.FC<CameraPreviewProps> = ({
         </div>
       </div>
 
-      {/* Main Video Viewport */}
-      <div className={`relative rounded-2xl overflow-hidden bg-black aspect-4/3 sm:aspect-16/10 flex items-center justify-center border border-stone-800 shadow-inner ${handDetected ? 'ring-2 ring-emerald-500/50' : ''}`}>
+      {/* Main Video Viewport (Perfectly Contained Responsive Aspect Ratio) */}
+      <div className={`relative w-full aspect-16/10 rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-stone-800 shadow-inner ${handDetected ? 'ring-2 ring-emerald-500/50' : ''}`}>
         {/* Hidden processing canvas for hand crop */}
         <canvas ref={canvasRef} className="hidden" />
 

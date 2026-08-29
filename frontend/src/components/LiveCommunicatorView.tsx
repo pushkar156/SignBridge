@@ -266,10 +266,10 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
         </div>
       </div>
 
-      {/* Main Grid Layout: Camera on Left, Output cards on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Camera Preview (7 Cols on desktop) */}
-        <div className="lg:col-span-7 space-y-4">
+      {/* Main Grid Layout: Fixed Camera on Left, Scrollable Output cards on Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Fixed/Sticky Camera Preview (7 Cols on desktop) */}
+        <div className="lg:col-span-7 lg:sticky lg:top-20 space-y-4 self-start">
           <CameraPreview
             onCaptureFrame={handleCaptureFrame}
             isProcessing={isProcessing}
@@ -283,13 +283,13 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
             <div className="flex items-center gap-2">
               <Info className="w-4 h-4 text-[#2F6B57] dark:text-[#4ADE80] shrink-0" />
               <span>
-                <strong>Tip:</strong> Keep palm facing the camera and hold each sign steady for ~1 second to append.
+                <strong>Tip:</strong> Keep palm facing the camera and hold each sign steady for ~1.5s to lock character into sequence.
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Prediction, Sequence, & AI Interpretation (5 Cols on desktop) */}
+        {/* Right Column: Prediction, Sequence, & AI Cards (5 Cols on desktop) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Prediction Result & Confidence Card */}
           <PredictionCard
