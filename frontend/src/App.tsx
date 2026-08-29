@@ -123,43 +123,45 @@ export default function App() {
         onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area with Smooth Page Transition */}
       <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-        {currentView === 'dashboard' && (
-          <DashboardView
-            onNavigate={setCurrentView}
-            backendStatus={backendStatus}
-            onOpenBackendModal={() => setIsBackendModalOpen(true)}
-          />
-        )}
+        <div key={currentView} className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
+          {currentView === 'dashboard' && (
+            <DashboardView
+              onNavigate={setCurrentView}
+              backendStatus={backendStatus}
+              onOpenBackendModal={() => setIsBackendModalOpen(true)}
+            />
+          )}
 
-        {currentView === 'live' && (
-          <LiveCommunicatorView
-            onBack={() => setCurrentView('dashboard')}
-            backendStatus={backendStatus}
-            onOpenBackendModal={() => setIsBackendModalOpen(true)}
-            accessibility={accessibility}
-            onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
-          />
-        )}
+          {currentView === 'live' && (
+            <LiveCommunicatorView
+              onBack={() => setCurrentView('dashboard')}
+              backendStatus={backendStatus}
+              onOpenBackendModal={() => setIsBackendModalOpen(true)}
+              accessibility={accessibility}
+              onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
+            />
+          )}
 
-        {currentView === 'learn' && (
-          <LearnISLView
-            onSelectPracticeSign={handleSelectPracticeSign}
-            onNavigate={setCurrentView}
-          />
-        )}
+          {currentView === 'learn' && (
+            <LearnISLView
+              onSelectPracticeSign={handleSelectPracticeSign}
+              onNavigate={setCurrentView}
+            />
+          )}
 
-        {currentView === 'practice' && (
-          <PracticeView
-            selectedSign={selectedPracticeSign}
-            onSelectSign={setSelectedPracticeSign}
-            backendStatus={backendStatus}
-            onOpenBackendModal={() => setIsBackendModalOpen(true)}
-          />
-        )}
+          {currentView === 'practice' && (
+            <PracticeView
+              selectedSign={selectedPracticeSign}
+              onSelectSign={setSelectedPracticeSign}
+              backendStatus={backendStatus}
+              onOpenBackendModal={() => setIsBackendModalOpen(true)}
+            />
+          )}
 
-        {currentView === 'about' && <AboutView />}
+          {currentView === 'about' && <AboutView />}
+        </div>
       </main>
 
       {/* Persistent Bottom Bar / Footer with Quick Switch and Status */}

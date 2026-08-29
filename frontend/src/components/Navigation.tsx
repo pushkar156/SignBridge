@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppView, BackendConnectionStatus, AccessibilitySettings } from '../types';
 import { 
   Camera, 
@@ -39,6 +39,10 @@ export const Navigation: React.FC<NavigationProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [a11yMenuOpen, setA11yMenuOpen] = useState(false);
 
+  const navRef = useRef<HTMLDivElement | null>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [pillStyle, setPillStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+
   const navItems: { id: AppView; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <Home className="w-4 h-4" /> },
     { id: 'live', label: 'Live Communicator', icon: <Camera className="w-4 h-4" /> },
@@ -46,6 +50,23 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'practice', label: 'Practice', icon: <Target className="w-4 h-4" /> },
     { id: 'about', label: 'About', icon: <Info className="w-4 h-4" /> },
   ];
+
+  // Calculate sliding pill coordinates on view change or window resize
+  useEffect(() => {
+    const updatePill = () => {
+      const activeBtn = buttonRefs.current[currentView];
+      if (activeBtn) {
+        setPillStyle({
+          left: activeBtn.offsetLeft,
+          width: activeBtn.offsetWidth,
+        });
+      }
+    };
+
+    updatePill();
+    window.addEventListener('resize', updatePill);
+    return () => window.removeEventListener('resize', updatePill);
+  }, [currentView]);
 
   const handleNavClick = (view: AppView) => {
     onNavigate(view);
@@ -80,26 +101,42 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
           </div>
 
-          {/* Desktop Navigation Links (Sleek Glassmorphic Pill Bar) */}
-          <nav className="hidden md:flex items-center p-1 bg-[#F5F8F6] dark:bg-[#131B16] rounded-2xl border border-stone-200/60 dark:border-[#243329]" aria-label="Main Navigation">
+          {/* Desktop Navigation Links (Sleek Glassmorphic Pill Bar with Sliding Indicator) */}
+          <nav 
+            ref={navRef}
+            className="relative hidden md:flex items-center p-1 bg-[#F5F8F6] dark:bg-[#131B16] rounded-2xl border border-stone-200/60 dark:border-[#243329]" 
+            aria-label="Main Navigation"
+          >
+            {/* Smooth Sliding Green Pill Highlight */}
+            {pillStyle.width > 0 && (
+              <div 
+                className="absolute top-1 bottom-1 bg-[#183D32] dark:bg-[#255746] rounded-xl shadow-md transition-all duration-300 cubic-bezier(0.34,1.56,0.64,1) pointer-events-none"
+                style={{
+                  left: `${pillStyle.left}px`,
+                  width: `${pillStyle.width}px`,
+                }}
+              />
+            )}
+
             {navItems.map((item) => {
               const isActive = currentView === item.id;
               return (
                 <button
                   key={item.id}
                   id={`nav-link-${item.id}`}
+                  ref={(el) => { buttonRefs.current[item.id] = el; }}
                   onClick={() => handleNavClick(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`relative flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-colors duration-200 active:scale-95 ${
                     isActive
-                      ? 'bg-[#183D32] text-white shadow-sm dark:bg-[#255746] dark:text-white'
-                      : 'text-stone-600 dark:text-[#9FB0A7] hover:text-[#183D32] dark:hover:text-white hover:bg-white/60 dark:hover:bg-[#1E2A23]'
+                      ? 'text-white'
+                      : 'text-stone-600 dark:text-[#9FB0A7] hover:text-[#183D32] dark:hover:text-white'
                   }`}
                 >
                   {item.icon}
                   <span>{item.label}</span>
                   {item.id === 'live' && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-300' : 'bg-emerald-500'} animate-pulse`} />
                   )}
                 </button>
               );
