@@ -23,8 +23,12 @@ Then open:
 """
 
 import os, sys, base64, io, copy, itertools, socket
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv() # Load GEMINI_API_KEY from .env
+
+# Load .env from project root (one level up from backend/)
+_ROOT_ENV = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=_ROOT_ENV)
 
 import numpy as np
 import pandas as pd
@@ -38,11 +42,12 @@ from mediapipe.tasks.python.vision import (
     HandLandmarkerOptions,
     RunningMode,
 )
+from tensorflow import keras
 import string
 
 # --- Config -------------------------------------------------------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-NPZ_PATH = os.path.join(SCRIPT_DIR, "ml_pipeline", "signbridge_weights.npz")
+MAITREE_MODEL_PATH = os.path.join(SCRIPT_DIR, "ml_pipeline", "signbridge_model_v1.h5")
 HAND_LANDMARKER_PATH = os.path.join(SCRIPT_DIR, "models", "hand_landmarker.task")
 
 # Classes: digits 1-9 then A-Z  (35 classes)
@@ -52,32 +57,10 @@ CLASS_LABELS = [str(i) for i in range(1, 10)] + list(string.ascii_uppercase)
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from Vite dev server (port 3000)
 
-# --- Load ISL classifier model (Ultra-lightweight Numpy Inference) -----------
-print("Loading custom 84-feature landmark model (Numpy format) ...")
-weights_data = np.load(NPZ_PATH)
-print("Numpy model weights loaded successfully (%s)" % NPZ_PATH)
-
-def relu(x):
-    return np.maximum(0, x)
-
-def softmax(x):
-    e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
-    return e_x / np.sum(e_x, axis=-1, keepdims=True)
-
-def predict_mlp(features):
-    x = np.array([features], dtype=np.float32)
-    # Layer 1
-    x = relu(np.dot(x, weights_data['dense_W']) + weights_data['dense_b'])
-    x = weights_data['batch_normalization_gamma'] * (x - weights_data['batch_normalization_mean']) / np.sqrt(weights_data['batch_normalization_var'] + weights_data['batch_normalization_eps'][0]) + weights_data['batch_normalization_beta']
-    # Layer 2
-    x = relu(np.dot(x, weights_data['dense_1_W']) + weights_data['dense_1_b'])
-    x = weights_data['batch_normalization_1_gamma'] * (x - weights_data['batch_normalization_1_mean']) / np.sqrt(weights_data['batch_normalization_1_var'] + weights_data['batch_normalization_1_eps'][0]) + weights_data['batch_normalization_1_beta']
-    # Layer 3
-    x = relu(np.dot(x, weights_data['dense_2_W']) + weights_data['dense_2_b'])
-    x = weights_data['batch_normalization_2_gamma'] * (x - weights_data['batch_normalization_2_mean']) / np.sqrt(weights_data['batch_normalization_2_var'] + weights_data['batch_normalization_2_eps'][0]) + weights_data['batch_normalization_2_beta']
-    # Layer 4 (Output Softmax)
-    x = np.dot(x, weights_data['dense_3_W']) + weights_data['dense_3_b']
-    return softmax(x)[0]
+# --- Load ISL classifier model (TensorFlow Keras) ----------------------------
+print("Loading custom 250-sample 42-feature landmark model (TensorFlow Keras) ...")
+model = keras.models.load_model(MAITREE_MODEL_PATH)
+print("TensorFlow model loaded successfully from %s" % MAITREE_MODEL_PATH)
 
 # --- MediaPipe Hand Landmarker (Tasks API) ------------------------------------
 print("Loading MediaPipe HandLandmarker ...")
@@ -87,7 +70,6 @@ hand_options = HandLandmarkerOptions(
     num_hands=2,
     min_hand_detection_confidence=0.5,
     min_hand_presence_confidence=0.5,
-    min_tracking_confidence=0.5,
 )
 hand_landmarker = HandLandmarker.create_from_options(hand_options)
 print("MediaPipe HandLandmarker ready (num_hands=2)")
@@ -95,7 +77,6 @@ print("MediaPipe HandLandmarker ready (num_hands=2)")
 
 # --- Landmark processing (identical to maitree isl_detection.py) --------------
 def calc_landmark_list(image_width, image_height, hand_landmarks):
-    """Extract pixel-coordinate landmarks from HandLandmarker results."""
     landmark_point = []
     for lm in hand_landmarks:
         landmark_x = min(int(lm.x * image_width), image_width - 1)
@@ -106,8 +87,8 @@ def calc_landmark_list(image_width, image_height, hand_landmarks):
 
 def pre_process_landmark(landmark_list):
     """
-    Normalize landmarks to relative coords, then scale to [-1, 1].
-    Exactly mirrors maitree model's preprocessing.
+    Normalize landmarks to relative coords relative to wrist (landmark 0), then scale by max absolute.
+    Matches maitree 250-sample model's exact preprocessing.
     """
     if not landmark_list:
         return [0.0] * 42  # 21 points * 2 coords = 42
@@ -133,9 +114,8 @@ def pre_process_landmark(landmark_list):
 
 def process_image(img_pil):
     """
-    Run MediaPipe on image, extract 84 features (Left + Right hands).
-    Pads with zeros if a hand is missing.
-    Returns (label, confidence, top3) or None if no hand detected.
+    Run MediaPipe on image, extract 42 relative features for the primary hand.
+    Returns (label, confidence, top3, frontend_landmarks) or None if no hand detected.
     """
     img_rgb = np.array(img_pil.convert("RGB"))
     image_height, image_width = img_rgb.shape[:2]
@@ -149,48 +129,25 @@ def process_image(img_pil):
     if not result.hand_landmarks or len(result.hand_landmarks) == 0:
         return None
 
-    left_hand_raw = []
-    right_hand_raw = []
-
-    # Loop through detected hands (up to 2)
-    for i in range(len(result.hand_landmarks)):
-        hand_lms = result.hand_landmarks[i]
-        label = result.handedness[i][0].category_name
-        
-        landmark_point = []
-        for lm in hand_lms:
-            landmark_x = min(int(lm.x * image_width), image_width - 1)
-            landmark_y = min(int(lm.y * image_height), image_height - 1)
-            landmark_point.append([landmark_x, landmark_y])
-            
-        if label == "Left":
-            left_hand_raw = landmark_point
-        elif label == "Right":
-            right_hand_raw = landmark_point
-            
-    # Normalize and pad
-    left_processed = pre_process_landmark(left_hand_raw)
-    right_processed = pre_process_landmark(right_hand_raw)
-    
-    # Combined 84 feature vector
-    features = left_processed + right_processed
-    
-    # Needs shape (1, 84)
-    df = pd.DataFrame([features])
+    # Use primary detected hand for classification (42 features)
+    primary_hand = result.hand_landmarks[0]
+    landmark_point = calc_landmark_list(image_width, image_height, primary_hand)
+    features_42 = pre_process_landmark(landmark_point)
 
     # Normalized landmarks for frontend visualization
     frontend_landmarks = {"left": [], "right": []}
     for i in range(len(result.hand_landmarks)):
         hand_lms = result.hand_landmarks[i]
-        label = result.handedness[i][0].category_name
+        label_str = result.handedness[i][0].category_name
         coords = [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in hand_lms]
-        if label == "Left":
+        if label_str == "Left":
             frontend_landmarks["left"] = coords
-        elif label == "Right":
+        elif label_str == "Right":
             frontend_landmarks["right"] = coords
 
-    # Predict (Numpy forward pass, ultra-lightweight)
-    probs = predict_mlp(features)
+    # Predict (TensorFlow Keras model prediction)
+    df = pd.DataFrame([features_42])
+    probs = model.predict(df, verbose=0)[0]
     idx = int(np.argmax(probs))
     confidence = float(probs[idx])
     label = CLASS_LABELS[idx]
@@ -265,18 +222,49 @@ def suggest_sentence():
     if not text.strip():
         return jsonify({"suggested": ""})
         
-    if not ai_available:
-        # Fallback to dumb capitalization if API is missing
-        return jsonify({"suggested": text.capitalize() + "."})
-        
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = f"You are a smart sign language assistant. The user has signed the following raw sequence of letters or words: '{text}'. Correct any grammar, spelling, or spacing, and output ONLY the single most likely natural English sentence they meant. Do not add any extra text or quotes."
-        response = model.generate_content(prompt)
-        return jsonify({"suggested": response.text.strip()})
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return jsonify({"suggested": text.capitalize() + "."})
+
+        prompt = (
+            f"You are a smart Google Keyboard (Gboard) style autocorrect and grammar assistant for Sign Language.\n"
+            f"The user has accumulated the following raw recognized letters or words from hand gestures: '{text}'.\n\n"
+            f"Your Task:\n"
+            f"1. If the input contains misspelled words or jumbled letters (for example: 'HELLZ' -> 'Hello', 'THNK' -> 'Thank you', 'WRLD' -> 'World'), autocorrect the spelling.\n"
+            f"2. If the input contains a sequence of sign words (for example: 'I GO MARKET YESTERDAY' -> 'I went to the market yesterday.'), convert it into a natural, grammatically correct English sentence.\n"
+            f"3. Output ONLY the final corrected word or natural English sentence. Do NOT use quotation marks, explanations, or extra text."
+        )
+
+        # 1. Try direct REST API with current Gemini 3.6 Flash endpoint
+        for model_name in ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-flash-latest']:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+                res = requests.post(url, json={'contents': [{'parts': [{'text': prompt}]}]}, timeout=25).json()
+                if 'candidates' in res and len(res['candidates']) > 0:
+                    text_out = res['candidates'][0]['content']['parts'][0]['text'].strip().strip('"').strip("'")
+                    if text_out:
+                        return jsonify({"suggested": text_out})
+            except Exception as req_err:
+                print(f"REST call {model_name} failed: {req_err}")
+                continue
+
+        # 2. SDK Fallback
+        if genai_module_available:
+            genai.configure(api_key=api_key)
+            for model_name in ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-1.5-flash']:
+                try:
+                    m = genai.GenerativeModel(model_name)
+                    r = m.generate_content(prompt)
+                    if r and r.text:
+                        return jsonify({"suggested": r.text.strip().strip('"').strip("'")})
+                except Exception:
+                    continue
+
+        return jsonify({"suggested": text.capitalize() + "."})
     except Exception as e:
         print(f"AI Suggestion Error: {e}")
-        return jsonify({"suggested": text + " (AI Error)"})
+        return jsonify({"suggested": text.capitalize() + "."})
 
 
 # --- Utilities ----------------------------------------------------------------
@@ -328,10 +316,9 @@ if __name__ == "__main__":
         print("        (self-signed certificate)")
         print("=" * 60)
         print("")
-        app.run(host="0.0.0.0", port=port, debug=False, ssl_context="adhoc")
+        app.run(host="0.0.0.0", port=5000, debug=False)
     else:
         print("  Desktop:  http://localhost:%d" % port)
-        print("  Mobile:   N/A (HTTPS required for camera)")
         print("=" * 60)
         print("")
-        app.run(host="0.0.0.0", port=port, debug=False)
+        app.run(host="0.0.0.0", port=5000, debug=False)

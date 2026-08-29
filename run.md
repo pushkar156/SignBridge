@@ -1,66 +1,119 @@
-# How to Run SignBridge
+# 🚀 How to Run & Setup SignBridge (First-Time Guide)
 
-SignBridge uses a high-performance **client-side MediaPipe 21-node hand tracker** combined with a **Flask ML backend (84-feature Keras MLP model + Gemini AI Brain)**.
-
----
-
-## 1. Environment Setup (Gemini API Key)
-To enable the AI Brain (smart sentence framing), create/update the `.env` file in the root project folder:
-
-```env
-GEMINI_API_KEY=your-api-key-here
-```
-*(If omitted, sign recognition will continue to work normally with standard sentence output).*
+Welcome to **SignBridge**! This guide will walk you step-by-step through setting up, running, testing on mobile, and optionally retraining the machine learning model.
 
 ---
 
-## 2. Start the Flask Backend (ML & AI Server)
-Open a terminal and start the Flask server:
+## 📋 1. Prerequisites
 
+Make sure you have the following installed on your machine:
+* **Python 3.10+**
+* **Node.js 18+** & `npm`
+* **Git**
+
+---
+
+## 🛠️ 2. First-Time Setup
+
+### Step A: Clone Repository & Setup Python Dependencies
+Open your terminal in the project root folder:
 ```powershell
-cd "d:\Pushkar\Pushkar\Personal Projects\SignBridge\backend"
+# 1. Install Python backend dependencies
+pip install -r requirements.txt
+```
+
+### Step B: Setup React Frontend Dependencies
+```powershell
+# 2. Navigate to frontend folder and install node modules
+cd frontend
+npm install
+cd ..
+```
+
+### Step C: Environment Configuration (`.env`)
+Create a `.env` file in the root project folder (or copy from `.env.example`):
+```env
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
+```
+> 💡 **Get a free Gemini API key:** Go to [Google AI Studio (aistudio.google.com/app/apikey)](https://aistudio.google.com/app/apikey) and click **Create API key**.
+
+---
+
+## 🏃 3. Running the Application
+
+To run SignBridge, you need **two terminal windows** open simultaneously:
+
+### Terminal 1: Start Python Backend (Flask + TensorFlow)
+```powershell
+cd backend
 python app.py
 ```
-* **Desktop endpoint:** `https://localhost:5000` (or `http://localhost:5000`)
-* **Mobile endpoint:** `https://<YOUR_LOCAL_IP>:5000`
+* **Backend Endpoint:** `http://localhost:5000`
 
 ---
 
-## 3. Start the Modern React Frontend (Vite)
-Open a **second, separate terminal** and start the Vite dev server:
-
+### Terminal 2: Start React Frontend (Vite)
 ```powershell
-cd "d:\Pushkar\Pushkar\Personal Projects\SignBridge\frontend"
-npm install
+cd frontend
 npm run dev
 ```
+* **Frontend UI:** `http://localhost:3000`
 
 ---
 
-## 4. Access the Application
-Once both servers are running:
+## 📱 4. Mobile Setup (Same Wi-Fi / Hotspot)
 
-* **Desktop:** Open `http://localhost:3000` in your web browser.
-* **Mobile:** Connect your mobile device to the same Wi-Fi network and open `http://<YOUR_LOCAL_IP>:3000` (or `http://192.168.56.1:3000`).
+To access SignBridge on your mobile phone:
+
+1. Connect your phone and laptop to the **same Wi-Fi network** or **mobile hotspot**.
+2. Find your laptop's IPv4 address:
+   ```powershell
+   ipconfig
+   ```
+   *(Look for `IPv4 Address` under Wi-Fi, e.g. `10.254.221.109` or `192.168.1.5`).*
+3. Open your mobile browser and go to:
+   ```text
+   http://<YOUR_LAPTOP_IP>:3000
+   ```
+   *(Example: `http://10.254.221.109:3000`)*
+
+> ⚠️ **Windows Firewall Note:** If your phone says *"Site can't be reached"*, change your Wi-Fi profile from **Public** to **Private** in *Windows Settings → Network & Internet → Wi-Fi*, or allow ports `3000` & `5000` through Windows Firewall.
 
 ---
 
-## 5. Architecture Summary
-1. **Client-Side Vision (30 FPS):** Loads MediaPipe Hands via CDN in browser to track 21 landmark nodes per hand and render green glowing bounding boxes with 0 latency.
-2. **Hand Crop Transmission:** Crops the exact hand bounding box and sends base64 image payload to `/predict` every ~350ms.
-3. **ML Classifier:** Flask extracts 84 normalized features and runs `signbridge_model_v1.h5` to return predicted label (A–Z, 1–9) and top-3 confidence ranks.
-4. **Hold Timer (1.5s):** Continuous holding of a sign for 1.5 seconds locks the character into the active sentence.
-5. **AI Sentence Construction:** Calls `/api/suggest` (Gemini API) to reframe raw sign strings into natural English sentences.
+## 🧠 5. Retraining the Neural Network (Optional)
 
----
+If you add new training images or want to retrain the 42-feature Keras landmark model:
 
-## 6. Retraining the Neural Network (Optional)
-To retrain the 84-feature MLP model:
 ```powershell
-cd "d:\Pushkar\Pushkar\Personal Projects\SignBridge\src\ml_pipeline"
-# 1. Extract 84-landmark vectors from raw image dataset
+# 1. Navigate to ML pipeline folder
+cd backend/ml_pipeline
+
+# 2. Extract 42 wrist-relative landmark coordinates from raw image dataset into dataset.csv
 python generate_dataset.py
-# 2. Train model and save signbridge_model_v1.h5
+
+# 3. Train Keras sequential neural network and save signbridge_model_v1.h5
 python train_model.py
 ```
 
+---
+
+## 📁 6. Repository Overview
+
+```text
+SignBridge/
+├── backend/
+│   ├── app.py                      # Flask API Server (/predict & /health)
+│   ├── models/
+│   │   └── hand_landmarker.task    # MediaPipe HandLandmarker Task file
+│   └── ml_pipeline/
+│       ├── signbridge_model_v1.h5  # Trained Keras 42-feature landmark classifier
+│       ├── generate_dataset.py     # Offline landmark extraction script
+│       └── train_model.py          # Offline neural network training script
+├── frontend/                       # React + Vite + Tailwind CSS User Interface
+│   ├── src/components/             # LiveCommunicator, SequenceBuilder, AISuggestionCard, etc.
+│   └── src/services/api.ts         # Browser API integration (Gemini & Flask)
+├── .env / .env.example             # Environment configuration file
+├── requirements.txt                # Python backend package dependencies
+└── run.md                          # First-Time setup & command guide
+```

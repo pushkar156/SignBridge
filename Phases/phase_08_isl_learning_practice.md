@@ -1,7 +1,7 @@
 # Phase 8: ISL Learning & Practice Module
 
-**Status:** Planned  
-**Module:** Capability Building & Employee Training  
+**Status:** POST-MVP ROADMAP  
+**Module:** Staff Training & Interactive Practice  
 **Dependencies:** Phase 7  
 
 ---

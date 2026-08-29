@@ -160,6 +160,92 @@ export const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
           <span>{isSuggesting ? 'Processing AI...' : 'Suggest Natural Sentence'}</span>
         </button>
       </div>
+
+      {/* Gboard Predictive Word Suggestion Chips */}
+      {(() => {
+        const rawText = sequence.join('');
+        const words = rawText.split(' ');
+        const lastWord = words[words.length - 1].toUpperCase();
+
+        const DICTIONARY = [
+          'HELLO', 'HELP', 'HEALTH', 'HOSPITAL', 'HAPPY', 'HOW', 'HOME',
+          'THANK', 'THANKS', 'TODAY', 'TIME',
+          'WATER', 'WHERE', 'WHAT', 'WHEN', 'WHY', 'WORLD',
+          'PLEASE', 'POLICE', 'PAIN',
+          'GOOD', 'GREAT', 'GO',
+          'MORNING', 'MEET', 'NAME',
+          'YES', 'NO', 'DEAF', 'SIGN', 'FRIEND', 'FAMILY', 'DOCTOR'
+        ];
+
+        let matches: string[] = [];
+        if (lastWord.length >= 1) {
+          matches = DICTIONARY.filter(w => w.startsWith(lastWord) && w !== lastWord).slice(0, 4);
+        }
+
+        if (matches.length === 0) return null;
+
+        const handleSelectSuggestion = (fullWord: string) => {
+          // Replace last word in sequence with fullWord + space
+          const prevWords = words.slice(0, -1);
+          const newText = [...prevWords, fullWord, ''].join(' ');
+          const newSeq = newText.split('');
+          // Update sequence in parent via onClear & onAddCharacter
+          onClear();
+          newSeq.forEach(c => onAddCharacter(c));
+        };
+
+        return (
+          <div className="pt-2 border-t border-stone-100 dark:border-[#283830] animate-in fade-in duration-200">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles className="w-3 h-3 text-[#E07A2B]" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-[#9FB0A7]">
+                Gboard Word Predictions:
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {matches.map((word) => (
+                <button
+                  key={word}
+                  onClick={() => handleSelectSuggestion(word)}
+                  className="px-3 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#1E2E3D] hover:bg-[#DBEAFE] dark:hover:bg-[#2A3E52] text-[#1D4ED8] dark:text-[#93C5FD] border border-[#BFDBFE] dark:border-[#2E4A6B] text-xs font-semibold transition-all hover:scale-105 shadow-2xs flex items-center gap-1"
+                  title={`Complete word to '${word}'`}
+                >
+                  <span>{word}</span>
+                  <span className="text-[10px] opacity-60">↵</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Quick Emergency & Preset Phrases Bar */}
+      <div className="pt-2 border-t border-stone-100 dark:border-[#283830]">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-2">
+          Quick Emergency & Phrase Shortcuts:
+        </div>
+        <div className="flex flex-wrap gap-1.5 text-xs">
+          {[
+            { label: '🚑 Need Help', phrase: 'HELP NEEDED' },
+            { label: '🏥 Hospital', phrase: 'WHERE HOSPITAL' },
+            { label: '🙏 Thank You', phrase: 'THANK YOU' },
+            { label: '🤟 I am Deaf', phrase: 'I AM DEAF' },
+            { label: '💧 Need Water', phrase: 'NEED WATER' }
+          ].map((preset) => (
+            <button
+              key={preset.label}
+              onClick={() => {
+                onClear();
+                preset.phrase.split('').forEach(c => onAddCharacter(c));
+              }}
+              className="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-[#1E2822] hover:bg-[#E8F0EC] dark:hover:bg-[#25382E] text-stone-700 dark:text-[#D5E2DB] text-[11px] font-medium transition-colors border border-stone-200 dark:border-[#283830]"
+              title={`Load preset '${preset.phrase}'`}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

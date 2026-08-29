@@ -19,9 +19,9 @@ export default defineConfig(() => {
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
       // Proxy API requests to the Flask backend during development (Flask is running on HTTPS)
       proxy: {
-        '/predict': { target: 'https://localhost:5000', secure: false },
-        '/api': { target: 'https://localhost:5000', secure: false },
-        '/health': { target: 'https://localhost:5000', secure: false },
+        '/predict': { target: 'http://127.0.0.1:5000', changeOrigin: true },
+        '/api': { target: 'http://127.0.0.1:5000', changeOrigin: true },
+        '/health': { target: 'http://127.0.0.1:5000', changeOrigin: true },
       },
     },
   };

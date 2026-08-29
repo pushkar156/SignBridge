@@ -13,7 +13,7 @@ export function getApiBaseUrl(): string {
   if (envUrl && typeof envUrl === 'string' && envUrl.trim() !== '') {
     return envUrl.trim().replace(/\/+$/, '');
   }
-  return ''; // Uses Vite proxy in dev (same-origin), configurable via VITE_API_BASE_URL or localStorage
+  return ''; // Uses same-origin / Vite dev proxy (proxies /health & /predict directly to Flask on port 5000)
 }
 
 export function setApiBaseUrl(url: string): void {
@@ -133,42 +133,64 @@ export async function predictImage(base64Image: string): Promise<PredictionRespo
 }
 
 export async function suggestSentence(text: string): Promise<SuggestionResponse> {
-  const baseUrl = getApiBaseUrl();
-  
   if (!text || text.trim().length === 0) {
     return { suggested: '', error: 'Sequence is empty. Please recognise some signs first.' };
   }
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string) || (window as any).GEMINI_API_KEY || '';
+  const prompt = [
+    "You are a smart Google Keyboard (Gboard) style autocorrect and grammar assistant for Sign Language.",
+    `The user has signed the following raw letters or words: '${text.trim()}'.`,
+    "",
+    "Your Task:",
+    "1. If the input contains misspelled words or jumbled letters (e.g. 'HELLZ' -> 'Hello', 'THNK' -> 'Thank you'), autocorrect the spelling.",
+    "2. If the input is a sequence of sign words (e.g. 'I GO MARKET YESTERDAY' -> 'I went to the market yesterday.'), convert it to a natural English sentence.",
+    "3. Output ONLY the final corrected word or sentence. No quotes, no explanations."
+  ].join('\n');
 
+  // Try direct Gemini REST API from browser (avoids backend network issues)
+  const models = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash'];
+  for (const model of models) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const out = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()?.replace(/^["']|["']$/g, '');
+        if (out) return { suggested: out };
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  // Fallback: try backend /api/suggest
+  try {
+    const baseUrl = getApiBaseUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
     const response = await fetch(`${baseUrl}/api/suggest`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ text: text.trim() }),
       signal: controller.signal,
     });
-
     clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Server returned status ${response.status}`);
+    if (response.ok) {
+      const data = await response.json();
+      return { suggested: data.suggested || '' };
     }
+  } catch { /* ignore */ }
 
-    const data = await response.json();
-    return {
-      suggested: data.suggested || data.text || 'Unable to generate interpretation',
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Network error';
-    return {
-      suggested: '',
-      error: `Failed to contact AI suggestion endpoint at ${baseUrl}/api/suggest: ${message}`,
-    };
-  }
+  return { suggested: '', error: 'AI suggestion timed out. Please try again.' };
 }

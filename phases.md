@@ -1,46 +1,47 @@
 # SignBridge India - Phase Documentation Directory
 
-This directory contains detailed technical specifications, workflows, architecture diagrams, and granular deliverables for each phase of **SignBridge India**.
+This directory tracks technical specifications, architecture decisions, completed MVP deliverables, and post-MVP roadmap goals for **SignBridge India**.
 
 ---
 
-## Phase Documentation Index
+## Phase Status Summary (MVP & Beyond)
 
-1. **[Phase 0: Project Setup & Scope Lock](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_00_project_setup.md)** `[COMPLETED]`  
-   *Foundation, repository layout, data contracts, environment setup (.env), and scope freezing.*
+1. **Phase 0: Project Setup & Scope Lock** `[COMPLETED]`
+   * Foundation, repository layout (Symmetric `frontend/` & `backend/`), data contracts, environment setup (`.env`), and scope freezing.
 
-2. **[Phase 1: Dataset & ISL Recognition Foundation](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_01_dataset_recognition.md)** `[IN PROGRESS - Milestone 1 MVP Done]`  
-   *84-landmark extractor, custom DNN model (99.84% test acc), 35-class ISL recognition. Milestone 2: Full dataset, real-world data, neutral class, geometric angles.*
+2. **Phase 1: Dataset & ISL Recognition Foundation** `[COMPLETED - MVP]`
+   * 42-feature wrist-relative landmark extractor, 250-sample Keras model (`signbridge_model_v1.h5`), 35-class ISL recognition (99%+ live stability).
 
-3. **[Phase 2: Camera & Computer Vision Pipeline](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_02_camera_cv_pipeline.md)** `[IN PROGRESS - Functional]`  
-   *Webcam stream, MediaPipe Tasks API hand detection, two-hand bounding box cropping, and HTTPS mobile streaming.*
+3. **Phase 2: Camera & Computer Vision Pipeline** `[COMPLETED - MVP]`
+   * Webcam stream, MediaPipe HandLandmarker Task API, real-time landmark overlay, and local network hotspot streaming.
 
-4. **[Phase 3: Sequence Construction](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_03_sequence_construction.md)** `[IN PROGRESS - Functional]`  
-   *Hold-to-Confirm prediction stabilization, character buffer, debounce timers, and clear/space actions.*
+4. **Phase 3: Sequence Construction** `[COMPLETED - MVP]`
+   * 1.5s Hold-to-Confirm prediction stabilization, character buffer, debounce timers, Undo/Space/Clear, and Gboard Predictive Word Suggestion Chips.
 
-5. **[Phase 4: AI Language Processing (AI Framing System)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_04_ai_language_processing.md)** `[IN PROGRESS - Functional]`  
-   *Gemini 1.5 Flash `/api/suggest` endpoint, automatic grammar correction, live UI suggestion card, and fallback handling.*
+5. **Phase 4: AI Language Processing (AI Framing & Autocorrect)** `[COMPLETED - MVP]`
+   * Gemini 3.6 Flash client REST Integration, Gboard-style spelling autocorrect (`HELLZ` → `Hello`), ISL grammar restructuring, and automatic Speech Synthesis (TTS).
 
-6. **[Phase 5: Multilingual Output (English, Hindi, Marathi)](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_05_multilingual_output.md)** `[PLANNED]`  
-   *Multi-target regional language translation, Devanagari Unicode rendering, and dynamic language switching.*
+6. **Phase 5: Multilingual Output & Accessibility** `[COMPLETED - MVP]`
+   * Browser-native Speech Synthesis (en-US / regional), high-contrast accessibility shortcuts, and Gboard predictive chips.
 
-7. **[Phase 6: Core Communication MVP Integration](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_06_core_communication_mvp.md)** `[PLANNED]`  
-   *Full integration of camera recognition (ISL → Text) and controlled phrase Avatar player (Text → ISL Avatar) into a unified two-way screen.*
+7. **Phase 6: Core Communication & Two-Way MVP Integration** `[COMPLETED - MVP]`
+   * Integrated live gesture recognition (ISL → Text), Two-Way Communication Card for hearing reply (Text → Visual Sign Cards + Audio), and Quick Emergency & Phrase Shortcuts.
 
-8. **[Phase 7: Healthcare Service Workflow & QR Entry](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_07_healthcare_service_workflow.md)**  
-   *Point-of-service QR standee entry, Quick Healthcare Phrase buttons, Avatar animation playback, and medical escalation boundaries.*
+---
 
-9. **[Phase 8: ISL Learning & Practice Module](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_08_isl_learning_practice.md)**  
-   *Bite-sized healthcare employee courses, interactive CV gesture scoring, and progress tracking.*
+## 🔮 Remaining Post-MVP Roadmap (Phases 7–12)
 
-10. **[Phase 9: Institution Dashboard & Readiness Monitoring](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_09_institution_dashboard_readiness.md)**  
-    *Admin dashboard, staff training tracking, QR service point management, and Institutional Readiness Score.*
+The following phases are planned for post-MVP enterprise scaling and physical hospital pilots:
 
-11. **[Phase 10: Validation & Community Testing](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_10_validation_community_testing.md)**  
-    *Deaf community and ISL expert sign audits, phrasing validation, and usability testing.*
-
-12. **[Phase 11: 90-Day Pune Healthcare Pilot](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_11_pune_pilot.md)**  
-    *Live deployment across 3–5 Pune healthcare centers, tracking 500+ sessions and 80%+ success rate.*
-
-13. **[Phase 12: Product Hardening & Scale Preparation](file:///d:/Pushkar/Pushkar/Personal%20Projects/SignBridge/phases/phase_12_hardening_scale_prep.md)**  
-    *Multi-tenant scaling, performance optimization, and V2 roadmap planning.*
+* **Phase 7: Healthcare Service Workflow & QR Entry** `[POST-MVP ROADMAP]`
+  * *Remaining:* Point-of-service QR standee entry for hospital desks, 3D animated ISL avatar player, and medical escalation boundaries.
+* **Phase 8: ISL Learning & Practice Module** `[POST-MVP ROADMAP]`
+  * *Remaining:* Interactive healthcare staff training courses, real-time CV gesture accuracy scoring, and staff certificates.
+* **Phase 9: Institution Dashboard & Readiness Monitoring** `[POST-MVP ROADMAP]`
+  * *Remaining:* Hospital admin portal, staff completion analytics, QR service point tracking, and Institutional Readiness Score.
+* **Phase 10: Community & Expert Validation** `[POST-MVP ROADMAP]`
+  * *Remaining:* Formal ISL educator & Deaf community audit sessions, cultural appropriateness sign verification.
+* **Phase 11: 90-Day Pune Healthcare Pilot** `[POST-MVP ROADMAP]`
+  * *Remaining:* Live physical deployment across 3–5 Pune hospital reception desks, tracking 500+ patient sessions.
+* **Phase 12: Product Hardening & Cloud Scale** `[POST-MVP ROADMAP]`
+  * *Remaining:* Multi-tenant cloud backend, OAuth user authentication, and high-concurrency scaling.

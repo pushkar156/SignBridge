@@ -1,6 +1,6 @@
 # Phase 7: Healthcare Service Workflow & QR Entry
 
-**Status:** Planned  
+**Status:** POST-MVP ROADMAP  
 **Module:** Point-of-Service Integration & Healthcare Workflows  
 **Dependencies:** Phase 6  
 

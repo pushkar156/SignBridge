@@ -1,7 +1,7 @@
 # Phase 9: Institution Dashboard & Readiness Monitoring
 
-**Status:** Planned  
-**Module:** Institutional Platform & Analytics  
+**Status:** POST-MVP ROADMAP  
+**Module:** Institutional Analytics & Admin Dashboard  
 **Dependencies:** Phase 8  
 
 ---

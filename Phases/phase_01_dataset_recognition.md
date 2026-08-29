@@ -1,6 +1,6 @@
 # Phase 1: Dataset & ISL Recognition Foundation
 
-**Status:** In Progress (Milestone 1 MVP Complete; Milestone 2 Optimization Planned)  
+**Status:** COMPLETED (MVP Live)  
 **Module:** Machine Learning & Computer Vision Engine  
 **Dependencies:** Phase 0  
 
@@ -10,16 +10,15 @@
 
 Phase 1 focuses on preparing the character-level ISL gesture dataset (35 classes: `A-Z`, `1-9`) and building a robust, lighting-invariant landmark recognition pipeline.
 
-Instead of unreliable raw pixel-based CNNs, the pipeline extracts **84 normalized landmarks (Left & Right hands)** using the MediaPipe Tasks API and feeds a Deep Neural Network (DNN) for real-time inference (`ISL sign → character`).
+Instead of unreliable raw pixel-based CNNs or zero-padded 84-landmark arrays, the pipeline extracts **42 wrist-relative normalized landmarks** using the MediaPipe Tasks API and feeds a Keras Deep Neural Network (DNN) for real-time inference (`ISL sign → character`).
 
 ---
 
-## 2. Current Implementation (Milestone 1 - 3-Day MVP)
+## 2. Current Implementation (MVP Complete)
 
-* **Dataset Extracted**: Extracted 8,405 landmark vectors from Kaggle ISL dataset (capped at 250 images/class for fast iteration).
-* **Model Architecture**: 4-layer Fully Connected Neural Network (Dense 256 → 128 → 64 → 35) with Batch Normalization and Dropout.
-* **Data Augmentation**: 4x expansion with coordinate jitter, wrist-relative scaling, and shifts (~33,000 augmented training samples).
-* **Accuracy Achieved**: **99.84% Test Accuracy** across 35 classes (`signbridge_model_v1.h5`).
+* **Dataset Extracted**: Extracted landmark vectors from 250 images/class single-hand dataset (`backend/ml_pipeline/dataset.csv`).
+* **Model Architecture**: 4-layer Fully Connected Neural Network (Dense 1024 → 632 → 328 → 152 → 35) with wrist-relative normalization.
+* **Accuracy Achieved**: High live webcam stability across 35 classes saved in `backend/ml_pipeline/signbridge_model_v1.h5`.
 
 ---
 
