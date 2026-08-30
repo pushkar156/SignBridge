@@ -12,8 +12,8 @@
   [![Track](https://img.shields.io/badge/Track-Accessibility-183D32?style=for-the-badge)](https://youngindians.net/)
   [![Python](https://img.shields.io/badge/Backend-Python%203.11%20%7C%20Flask-1D4ED8?style=for-the-badge&logo=python)](https://flask.palletsprojects.com/)
   [![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%206-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
-  [![AI](https://img.shields.io/badge/AI-Gemini%203.6%20Flash-8E44AD?style=for-the-badge&logo=googlegemini)](https://deepmind.google/technologies/gemini/)
   [![ML](https://img.shields.io/badge/ML-TensorFlow%20%7C%20MediaPipe-FF6F00?style=for-the-badge&logo=tensorflow)](https://ai.google.dev/edge/mediapipe/solutions/guide)
+  [![License](https://img.shields.io/badge/License-MIT-4ADE80?style=for-the-badge&logo=open-source-initiative)](LICENSE)
 
 </div>
 
