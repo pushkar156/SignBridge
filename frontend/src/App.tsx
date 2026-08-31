@@ -164,39 +164,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Persistent Bottom Bar / Footer with Quick Switch and Status */}
-      <footer className="mt-auto bg-white dark:bg-[#161D19] border-t border-[#E8F0EC] dark:border-[#233128] py-4 px-4 sm:px-8 transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6D756F] dark:text-[#8E9E95]">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#2F6B57] dark:bg-[#34D399]" />
-            <span className="font-semibold text-[#183D32] dark:text-[#76CBA6]">SignBridge India</span>
-            <span>—</span>
-            <span>AI-Assisted Indian Sign Language Platform</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsShortcutsModalOpen(true)}
-              className="hover:text-[#183D32] dark:hover:text-white transition-colors"
-            >
-              Shortcuts (<kbd className="px-1 py-0.5 bg-stone-100 dark:bg-[#222E27] dark:text-stone-300 rounded text-[10px]">Ctrl+/</kbd>)
-            </button>
-            <span>•</span>
-            <button
-              onClick={() => setIsBackendModalOpen(true)}
-              className="hover:text-[#183D32] dark:hover:text-white transition-colors flex items-center gap-1.5"
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  backendStatus === 'connected' ? 'bg-emerald-500' : 'bg-rose-500'
-                }`}
-              />
-              <span>API: {backendStatus === 'connected' ? 'Connected' : 'Offline'}</span>
-            </button>
-          </div>
-        </div>
-      </footer>
-
       {/* Modals */}
       <BackendStatusModal
         isOpen={isBackendModalOpen}
