@@ -210,65 +210,11 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
   }, [sequence, suggestion]);
 
   return (
-    <div id="live-communicator-view" className="space-y-6 pb-12">
-      {/* Top Header & Breadcrumbs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/80 dark:border-[#283830] pb-4">
-        <div className="flex items-center gap-3">
-          <button
-            id="btn-back-dashboard"
-            onClick={onBack}
-            className="p-2 rounded-xl bg-white dark:bg-[#1A241F] hover:bg-stone-100 dark:hover:bg-[#24332A] text-stone-700 dark:text-[#D5E2DB] border border-stone-200 dark:border-[#283830] shadow-2xs transition-colors flex items-center gap-1.5 text-xs font-semibold"
-            aria-label="Back to Dashboard"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
-          </button>
-
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-[#F0F5F2] tracking-tight">
-                Live ISL Communicator
-              </h1>
-              <span className="flex items-center gap-1 text-[11px] font-bold bg-emerald-100 dark:bg-[#1B382B] text-emerald-900 dark:text-[#76CBA6] px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700/50">
-                <Radio className="w-3 h-3 text-emerald-600 dark:text-[#4ADE80] animate-pulse" />
-                Live Stream
-              </span>
-            </div>
-            <p className="text-xs text-stone-500 dark:text-[#9FB0A7]">
-              Webcam Capture → Flask MediaPipe → 35-Class Keras Model → Sequence Builder
-            </p>
-          </div>
-        </div>
-
-        {/* Action badges */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button
-            onClick={onOpenShortcutsModal}
-            className="p-2 rounded-xl bg-white dark:bg-[#1A241F] hover:bg-stone-100 dark:hover:bg-[#24332A] text-stone-600 dark:text-[#D5E2DB] border border-stone-200 dark:border-[#283830] text-xs font-medium flex items-center gap-1.5 shadow-2xs"
-            title="View Keyboard Shortcuts"
-          >
-            <Keyboard className="w-3.5 h-3.5 text-[#2F6B57] dark:text-[#4ADE80]" />
-            <span className="hidden sm:inline">Shortcuts</span>
-          </button>
-
-          <button
-            onClick={onOpenBackendModal}
-            className={`px-3 py-2 rounded-xl text-xs font-medium border flex items-center gap-1.5 shadow-2xs ${
-              backendStatus === 'connected'
-                ? 'bg-emerald-50 dark:bg-[#183325] text-emerald-900 dark:text-[#76CBA6] border-emerald-200 dark:border-emerald-800/40'
-                : 'bg-rose-50 dark:bg-[#331C1F] text-rose-900 dark:text-[#FBA65B] border-rose-200 dark:border-rose-800/40'
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${backendStatus === 'connected' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-            <span>{backendStatus === 'connected' ? 'Backend Ready' : 'Backend Offline'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Grid Layout: Fixed Camera on Left, Scrollable Output cards on Right */}
+    <div id="live-communicator-view" className="space-y-4">
+      {/* Main Grid Layout: Stationary Camera on Left, Scrollable Output cards on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Fixed/Sticky Camera Preview (7 Cols on desktop) */}
-        <div className="lg:col-span-7 lg:sticky lg:top-20 space-y-4 self-start">
+        {/* Left Column: Stationary Camera Preview (7 Cols on desktop) */}
+        <div className="lg:col-span-7 space-y-3">
           <CameraPreview
             onCaptureFrame={handleCaptureFrame}
             isProcessing={isProcessing}
@@ -286,7 +232,7 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
           />
 
           {/* Quick helpful gesture hint banner */}
-          <div className="bg-[#E8F0EC]/60 dark:bg-[#182820] rounded-2xl p-4 border border-[#2F6B57]/20 dark:border-[#2F6B57]/40 flex items-center justify-between text-xs text-stone-700 dark:text-[#D5E2DB]">
+          <div className="bg-[#E8F0EC]/60 dark:bg-[#182820] rounded-2xl p-3 border border-[#2F6B57]/20 dark:border-[#2F6B57]/40 flex items-center justify-between text-xs text-stone-700 dark:text-[#D5E2DB]">
             <div className="flex items-center gap-2">
               <Info className="w-4 h-4 text-[#2F6B57] dark:text-[#4ADE80] shrink-0" />
               <span>
@@ -296,8 +242,8 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Prediction, Sequence, & AI Cards (5 Cols on desktop) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Right Column: Independently Scrollable Prediction, Sequence, & AI Cards (5 Cols on desktop) */}
+        <div className="lg:col-span-5 space-y-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar">
           {/* Prediction Result & Confidence Card */}
           <PredictionCard
             prediction={prediction}

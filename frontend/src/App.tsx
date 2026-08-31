@@ -124,7 +124,7 @@ export default function App() {
       />
 
       {/* Main Content Area with Smooth Page Transition */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+      <main id="main-content" className={`flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 ${currentView === 'live' ? 'pt-4 pb-4' : 'pt-6 pb-12'}`}>
         <div key={currentView} className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
           {currentView === 'dashboard' && (
             <DashboardView
