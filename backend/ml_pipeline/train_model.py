@@ -30,35 +30,48 @@ def load_data():
     X = features.astype(np.float32)
     return X, y
 
-def augment_data(X, y, num_augments=3):
+def augment_data(X, y, num_augments=2):
     """
-    Apply slight random translations and noise to the landmarks to simulate 
-    mobile camera jitter and different hand positions.
+    Apply horizontal mirroring (Left Hand <-> Right Hand ambidexterity)
+    and random translations/scaling/noise to simulate camera variance.
     """
-    print(f"Applying data augmentation (x{num_augments})...")
-    X_aug = [X]
-    y_aug = [y]
+    # Exclude directional signs where left/right orientation defines the letter (e.g., H points right, N points left)
+    # Mirroring H horizontally creates the exact landmark profile of N (0.99 correlation), destroying classification!
+    DIRECTIONAL_EXCLUDE = {'H', 'N', 'R'}
+    exclude_indices = [CLASS_TO_IDX[c] for c in DIRECTIONAL_EXCLUDE if c in CLASS_TO_IDX]
+    
+    mirror_mask = ~np.isin(y, exclude_indices)
+    X_mirrorable = X[mirror_mask].copy()
+    y_mirrorable = y[mirror_mask].copy()
+    
+    X_mirrored = X_mirrorable.copy()
+    X_mirrored[:, 0::2] = -X_mirrored[:, 0::2]
+    
+    X_base = np.vstack([X, X_mirrored])
+    y_base = np.concatenate([y, y_mirrorable])
+    
+    X_aug = [X_base]
+    y_aug = [y_base]
     
     for _ in range(num_augments):
         # 1. Add random Gaussian noise (jitter)
-        noise = np.random.normal(0, 0.02, X.shape).astype(np.float32)
+        noise = np.random.normal(0, 0.02, X_base.shape).astype(np.float32)
         
         # 2. Add random scaling (0.9 to 1.1)
-        scale = np.random.uniform(0.9, 1.1, (X.shape[0], 1)).astype(np.float32)
+        scale = np.random.uniform(0.9, 1.1, (X_base.shape[0], 1)).astype(np.float32)
         
         # 3. Add random shift (translation)
-        shift = np.random.uniform(-0.05, 0.05, X.shape).astype(np.float32)
+        shift = np.random.uniform(-0.05, 0.05, X_base.shape).astype(np.float32)
         
-        X_new = (X * scale) + shift + noise
+        X_new = (X_base * scale) + shift + noise
         
         # Re-normalize just to be safe (max absolute value per row to 1.0)
         max_vals = np.max(np.abs(X_new), axis=1, keepdims=True)
-        # Avoid division by zero
         max_vals[max_vals == 0] = 1.0
         X_new = X_new / max_vals
         
         X_aug.append(X_new)
-        y_aug.append(y)
+        y_aug.append(y_base)
         
     return np.vstack(X_aug), np.concatenate(y_aug)
 

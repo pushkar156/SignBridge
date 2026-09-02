@@ -48,11 +48,12 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
   const [stabilityScore, setStabilityScore] = useState<number>(0);
   const [currentPendingSign, setCurrentPendingSign] = useState<string | null>(null);
 
-  // Debounce tracking refs matching old index.html (1.5 seconds hold)
+  // Debounce tracking refs with 1-frame glitch tolerance
   const holdLabelRef = useRef<string | null>(null);
   const holdStartRef = useRef<number | null>(null);
   const lastCommittedSignRef = useRef<string | null>(null);
-  const HOLD_MS = 1500; // 1.5 seconds hold requirement
+  const missedFramesRef = useRef<number>(0);
+  const HOLD_MS = 1200; // 1.2 seconds hold requirement (smooth, stable, and responsive)
 
   // AI Interpretation state
   const [suggestion, setSuggestion] = useState<string | null>(null);
@@ -73,8 +74,9 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
       const confidence = res.confidence || 0;
       const isReliable = detectedLabel !== '?' && !res.error && confidence >= 0.50;
 
-      // Handle 1.5s Hold Timer Logic (matching old index.html)
+      // Handle Hold Timer Logic with transient frame smoothing
       if (isReliable) {
+        missedFramesRef.current = 0;
         const now = Date.now();
         if (holdLabelRef.current !== detectedLabel) {
           holdLabelRef.current = detectedLabel;
@@ -88,7 +90,7 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
         setStabilityScore(score);
         setCurrentPendingSign(detectedLabel);
 
-        // Commit character after 1.5s continuous hold if not already committed
+        // Commit character after continuous hold if not already committed
         if (
           autoDebounceEnabled &&
           progress >= 1.0 &&
@@ -99,12 +101,15 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
           holdStartRef.current = Date.now(); // Reset timer for next sign
         }
       } else {
-        // Reset hold timer if hand removed or low confidence
-        holdLabelRef.current = null;
-        holdStartRef.current = null;
-        lastCommittedSignRef.current = null;
-        setStabilityScore(0);
-        setCurrentPendingSign(null);
+        // Tolerant reset: only clear hold state if hand missing for 2+ consecutive frames
+        missedFramesRef.current += 1;
+        if (missedFramesRef.current >= 2) {
+          holdLabelRef.current = null;
+          holdStartRef.current = null;
+          lastCommittedSignRef.current = null;
+          setStabilityScore(0);
+          setCurrentPendingSign(null);
+        }
       }
     } catch (err) {
       console.error('Prediction call failed:', err);

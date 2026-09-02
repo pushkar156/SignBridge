@@ -22,14 +22,15 @@ bros model/templates/
 
 # Datasets & Heavy Training Data
 Dataset/
-src/ml_pipeline/dataset.csv
-*.csv
+dataset_full_41k.csv
+dataset.csv
 keypoint.csv
 
 # Legacy / Scratch Experiment Directories
 bros model/
 maitree model/
 Phases/
-important.md
 phases.md
+test photos/
+important.md
 SignBridge_India_MVP_PRD.md

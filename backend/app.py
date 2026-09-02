@@ -1,28 +1,5 @@
-"""
-ISL Web App - Landmark-Based Flask Backend
-===========================================
-Uses the maitree model (landmark classifier: 42 features -> 35 classes)
-instead of the bros CNN (image-based, broken on real webcam input).
-
-Pipeline:
-  1. Receive base64 hand-crop image from browser
-  2. Run MediaPipe HandLandmarker (Tasks API) server-side -> extract 21 landmarks
-  3. Normalize landmarks (relative coords, scale to [-1, 1])
-  4. Classify with maitree model.h5
-  5. Return label + confidence + top-3
-
-Mobile support:
-  - Binds to 0.0.0.0 (accessible on local network)
-  - Generates self-signed HTTPS cert (required for getUserMedia on mobile)
-
-Run:
-    python app_landmark.py
-Then open:
-    Desktop:  https://localhost:5000
-    Mobile:   https://<your-pc-ip>:5000
-"""
-
 import os, sys, base64, io, copy, itertools, socket
+from collections import deque
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -112,11 +89,18 @@ def pre_process_landmark(landmark_list):
     return flat
 
 
+# Rolling prediction buffer for temporal stability (eliminates single-frame classification flicker)
+PREDICTION_WINDOW_SIZE = 5
+prediction_history = deque(maxlen=PREDICTION_WINDOW_SIZE)
+
 def process_image(img_pil):
     """
     Run MediaPipe on image, extract 42 relative features for the primary hand.
+    Applies temporal moving-average smoothing over recent frames for rock-solid stability.
     Returns (label, confidence, top3, frontend_landmarks) or None if no hand detected.
     """
+    global prediction_history
+
     img_rgb = np.array(img_pil.convert("RGB"))
     image_height, image_width = img_rgb.shape[:2]
 
@@ -127,6 +111,7 @@ def process_image(img_pil):
     result = hand_landmarker.detect(mp_image)
 
     if not result.hand_landmarks or len(result.hand_landmarks) == 0:
+        prediction_history.clear()
         return None
 
     # Use primary detected hand for classification (42 features)
@@ -134,7 +119,7 @@ def process_image(img_pil):
     landmark_point = calc_landmark_list(image_width, image_height, primary_hand)
     features_42 = pre_process_landmark(landmark_point)
 
-    # Normalized landmarks for frontend visualization
+    # Extract all detected hands for frontend visual skeleton overlay
     frontend_landmarks = {"left": [], "right": []}
     for i in range(len(result.hand_landmarks)):
         hand_lms = result.hand_landmarks[i]
@@ -147,14 +132,19 @@ def process_image(img_pil):
 
     # Predict (TensorFlow Keras model prediction)
     df = pd.DataFrame([features_42])
-    probs = model.predict(df, verbose=0)[0]
-    idx = int(np.argmax(probs))
-    confidence = float(probs[idx])
+    raw_probs = model.predict(df, verbose=0)[0]
+
+    # Apply temporal moving-average smoothing across sliding window
+    prediction_history.append(raw_probs)
+    smoothed_probs = np.mean(prediction_history, axis=0)
+
+    idx = int(np.argmax(smoothed_probs))
+    confidence = float(smoothed_probs[idx])
     label = CLASS_LABELS[idx]
     
     # Top 3
-    top3_idx = np.argsort(probs)[-3:][::-1]
-    top3 = [{"label": CLASS_LABELS[i], "conf": float(probs[i])} for i in top3_idx]
+    top3_idx = np.argsort(smoothed_probs)[-3:][::-1]
+    top3 = [{"label": CLASS_LABELS[i], "conf": float(smoothed_probs[i])} for i in top3_idx]
     
     return label, confidence, top3, frontend_landmarks
 
