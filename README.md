@@ -8,8 +8,6 @@
 
   *Bridging the gap between Deaf citizens and frontline service providers in Healthcare, Public Transit, and Governance.*
 
-  [![YUVA Future 6.0](https://img.shields.io/badge/Competition-YUVA%20Future%206.0-E07A2B?style=for-the-badge&logo=target)](https://youngindians.net/)
-  [![Track](https://img.shields.io/badge/Track-Accessibility-183D32?style=for-the-badge)](https://youngindians.net/)
   [![Python](https://img.shields.io/badge/Backend-Python%203.11%20%7C%20Flask-1D4ED8?style=for-the-badge&logo=python)](https://flask.palletsprojects.com/)
   [![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%206-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
   [![ML](https://img.shields.io/badge/ML-TensorFlow%20%7C%20MediaPipe-FF6F00?style=for-the-badge&logo=tensorflow)](https://ai.google.dev/edge/mediapipe/solutions/guide)
@@ -259,7 +257,6 @@ This project is licensed under the **MIT License** - see the **[`LICENSE`](file:
 
 ## 🤝 Contributors & Acknowledgments
 
-* **Programme:** Developed for **YUVA Future 6.0 (Young Indians, CII)** under the Accessibility Track.
 * **Core Contributor:** Pushkar & Team
 * **Frameworks & Libraries:** [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/guide), [TensorFlow](https://www.tensorflow.org/), [Flask](https://flask.palletsprojects.com/), [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [Google Gemini](https://deepmind.google/technologies/gemini/).
 
