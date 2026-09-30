@@ -87,160 +87,210 @@ export const CameraPreview: React.FC<CameraPreviewProps> = ({
     ctx.closePath();
   };
 
-  // Initialize MediaPipe Hands
-  useEffect(() => {
-    // @ts-ignore
-    if (!window.Hands) return;
+  // Callback reference to prevent recreating MediaPipe listeners
+  const onResultsRef = useRef<any>(null);
 
-    // @ts-ignore
-    handsRef.current = new window.Hands({
-      locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
+  // Define onResults handler
+  const handleResults = useCallback((results: any) => {
+    // Calculate FPS
+    fpsFrameCount.current++;
+    const now = performance.now();
+    if (now - fpsLastTime.current >= 1000) {
+      setFps(fpsFrameCount.current);
+      fpsFrameCount.current = 0;
+      fpsLastTime.current = now;
+    }
 
-    handsRef.current.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.60,
-      minTrackingConfidence: 0.50,
-    });
-
-    handsRef.current.onResults((results: any) => {
-      // Calculate FPS
-      fpsFrameCount.current++;
-      const now = performance.now();
-      if (now - fpsLastTime.current >= 1000) {
-        setFps(fpsFrameCount.current);
-        fpsFrameCount.current = 0;
-        fpsLastTime.current = now;
+    if (!overlayCanvasRef.current || !videoRef.current) return;
+    
+    const canvas = overlayCanvasRef.current;
+    const video = videoRef.current;
+    
+    if (video.videoWidth && video.videoHeight) {
+      if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
       }
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (!overlayCanvasRef.current || !videoRef.current) return;
-      
-      const canvas = overlayCanvasRef.current;
-      const video = videoRef.current;
-      
-      if (video.videoWidth && video.videoHeight) {
-        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-        }
-      }
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+      setHandDetected(false);
+      return;
+    }
 
-      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-        setHandDetected(false);
-        return;
-      }
+    setHandDetected(true);
 
-      setHandDetected(true);
+    const allXs: number[] = [];
+    const allYs: number[] = [];
 
-      const allXs: number[] = [];
-      const allYs: number[] = [];
+    // Render 21 landmark nodes & skeleton for each hand
+    if (showGuide) {
+      results.multiHandLandmarks.forEach((landmarks: any[]) => {
+        landmarks.forEach((l: any) => {
+          const px = l.x * canvas.width;
+          const py = l.y * canvas.height;
+          allXs.push(px);
+          allYs.push(py);
+        });
 
-      // Render 21 landmark nodes & skeleton for each hand exactly like old index.html
-      if (showGuide) {
-        results.multiHandLandmarks.forEach((landmarks: any[]) => {
-          landmarks.forEach((l: any) => {
-            const px = l.x * canvas.width;
-            const py = l.y * canvas.height;
-            allXs.push(px);
-            allYs.push(py);
-          });
-
-          // Draw skeleton lines
-          ctx.strokeStyle = 'rgba(99, 102, 241, 0.7)';
-          ctx.lineWidth = 2.5;
-          CONNECTIONS.forEach(([a, b]) => {
-            if (landmarks[a] && landmarks[b]) {
-              ctx.beginPath();
-              ctx.moveTo(landmarks[a].x * canvas.width, landmarks[a].y * canvas.height);
-              ctx.lineTo(landmarks[b].x * canvas.width, landmarks[b].y * canvas.height);
-              ctx.stroke();
-            }
-          });
-
-          // Draw 21 keypoint circles
-          landmarks.forEach((l: any) => {
+        // Draw skeleton lines
+        ctx.strokeStyle = 'rgba(99, 102, 241, 0.7)';
+        ctx.lineWidth = 2.5;
+        CONNECTIONS.forEach(([a, b]) => {
+          if (landmarks[a] && landmarks[b]) {
             ctx.beginPath();
-            ctx.arc(l.x * canvas.width, l.y * canvas.height, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = '#6366f1';
-            ctx.fill();
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 1;
+            ctx.moveTo(landmarks[a].x * canvas.width, landmarks[a].y * canvas.height);
+            ctx.lineTo(landmarks[b].x * canvas.width, landmarks[b].y * canvas.height);
             ctx.stroke();
-          });
+          }
         });
-      } else {
-        // Collect coordinates even if guide drawing is turned off
-        results.multiHandLandmarks.forEach((landmarks: any[]) => {
-          landmarks.forEach((l: any) => {
-            allXs.push(l.x * canvas.width);
-            allYs.push(l.y * canvas.height);
-          });
+
+        // Draw 21 keypoint circles
+        landmarks.forEach((l: any) => {
+          ctx.beginPath();
+          ctx.arc(l.x * canvas.width, l.y * canvas.height, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = '#6366f1';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 1;
+          ctx.stroke();
         });
+      });
+    } else {
+      results.multiHandLandmarks.forEach((landmarks: any[]) => {
+        landmarks.forEach((l: any) => {
+          allXs.push(l.x * canvas.width);
+          allYs.push(l.y * canvas.height);
+        });
+      });
+    }
+
+    // Compute unified bounding box enclosing ALL hands with padding
+    if (allXs.length > 0 && allYs.length > 0) {
+      const pad = 40;
+      const x1 = Math.max(0, Math.min(...allXs) - pad);
+      const y1 = Math.max(0, Math.min(...allYs) - pad);
+      const x2 = Math.min(canvas.width, Math.max(...allXs) + pad);
+      const y2 = Math.min(canvas.height, Math.max(...allYs) + pad);
+      const w = x2 - x1;
+      const h = y2 - y1;
+
+      // Draw green glowing bounding box
+      if (showGuide && w > 10 && h > 10) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#22c55e';
+        ctx.shadowBlur = 12;
+        drawRoundRect(ctx, x1, y1, w, h, 10);
+        ctx.stroke();
+        ctx.shadowBlur = 0; // reset shadow
       }
 
-      // Compute unified bounding box enclosing ALL hands with padding
-      if (allXs.length > 0 && allYs.length > 0) {
-        const pad = 40;
-        const x1 = Math.max(0, Math.min(...allXs) - pad);
-        const y1 = Math.max(0, Math.min(...allYs) - pad);
-        const x2 = Math.min(canvas.width, Math.max(...allXs) + pad);
-        const y2 = Math.min(canvas.height, Math.max(...allYs) + pad);
-        const w = x2 - x1;
-        const h = y2 - y1;
-
-        // Draw green glowing bounding box matching old index.html
-        if (showGuide && w > 10 && h > 10) {
-          ctx.strokeStyle = '#22c55e';
-          ctx.lineWidth = 2.5;
-          ctx.shadowColor = '#22c55e';
-          ctx.shadowBlur = 12;
-          drawRoundRect(ctx, x1, y1, w, h, 10);
-          ctx.stroke();
-          ctx.shadowBlur = 0; // reset shadow
-        }
-
-        // Send hand-cropped image to backend (throttled ~400ms)
-        if (canvasRef.current && w > 10 && h > 10) {
-          if (now - lastCaptureTime.current > 350) {
-            lastCaptureTime.current = now;
-            const processingCanvas = canvasRef.current;
-            processingCanvas.width = w;
-            processingCanvas.height = h;
-            const pCtx = processingCanvas.getContext('2d');
-            if (pCtx) {
-              // Crop exact hand bounding box from raw video frame
-              pCtx.drawImage(video, x1, y1, w, h, 0, 0, w, h);
-              const base64Data = processingCanvas.toDataURL('image/jpeg', 0.85);
-              onCaptureFrame(base64Data);
-            }
+      // Send hand-cropped image to backend (throttled ~350ms)
+      if (canvasRef.current && w > 10 && h > 10) {
+        if (now - lastCaptureTime.current > 350) {
+          lastCaptureTime.current = now;
+          const processingCanvas = canvasRef.current;
+          processingCanvas.width = w;
+          processingCanvas.height = h;
+          const pCtx = processingCanvas.getContext('2d');
+          if (pCtx) {
+            pCtx.drawImage(video, x1, y1, w, h, 0, 0, w, h);
+            const base64Data = processingCanvas.toDataURL('image/jpeg', 0.85);
+            onCaptureFrame(base64Data);
           }
         }
       }
-    });
+    }
+  }, [showGuide, onCaptureFrame]);
+
+  onResultsRef.current = handleResults;
+
+  // Initialize MediaPipe Hands on demand or during effect
+  const initHandsInstance = useCallback(() => {
+    // @ts-ignore
+    if (!window.Hands) return null;
+    if (handsRef.current) return handsRef.current;
+
+    try {
+      // @ts-ignore
+      const hands = new window.Hands({
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      });
+
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.60,
+        minTrackingConfidence: 0.50,
+      });
+
+      hands.onResults((results: any) => {
+        if (onResultsRef.current) {
+          onResultsRef.current(results);
+        }
+      });
+
+      handsRef.current = hands;
+      return hands;
+    } catch (err) {
+      console.error('Failed to instantiate MediaPipe Hands:', err);
+      return null;
+    }
+  }, []);
+
+  // Poll for MediaPipe script loading if not immediately available
+  useEffect(() => {
+    if (initHandsInstance()) return;
+
+    const interval = setInterval(() => {
+      // @ts-ignore
+      if (window.Hands) {
+        initHandsInstance();
+        clearInterval(interval);
+      }
+    }, 200);
 
     return () => {
+      clearInterval(interval);
       if (handsRef.current) {
         handsRef.current.close();
+        handsRef.current = null;
       }
     };
-  }, [showGuide, facingMode, onCaptureFrame]);
+  }, [initHandsInstance]);
 
   // Start webcam
   const startCamera = async () => {
     setError(null);
     try {
       if (!videoRef.current) return;
-      
+
+      // Wait up to 3 seconds for MediaPipe scripts if still loading
+      let hands = handsRef.current || initHandsInstance();
+      if (!hands) {
+        for (let i = 0; i < 15; i++) {
+          await new Promise(r => setTimeout(r, 200));
+          hands = initHandsInstance();
+          if (hands) break;
+        }
+      }
+
       // @ts-ignore
-      if (window.Camera && handsRef.current) {
-        fpsLastTime.current = performance.now();
-        
+      if (!window.Camera && !navigator.mediaDevices?.getUserMedia) {
+        setError("Camera API is not supported in this browser.");
+        return;
+      }
+
+      fpsLastTime.current = performance.now();
+
+      // @ts-ignore
+      if (window.Camera) {
         // @ts-ignore
         cameraRef.current = new window.Camera(videoRef.current, {
           onFrame: async () => {
@@ -255,11 +305,27 @@ export const CameraPreview: React.FC<CameraPreviewProps> = ({
         await cameraRef.current.start();
         setIsActive(true);
       } else {
-        setError("MediaPipe is not loaded yet. Please refresh the page.");
+        // Fallback to native getUserMedia if window.Camera is unavailable
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480, facingMode }
+        });
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+        setIsActive(true);
+
+        const processLoop = async () => {
+          if (videoRef.current && handsRef.current && videoRef.current.readyState >= 2) {
+            await handsRef.current.send({ image: videoRef.current });
+          }
+          if (videoRef.current && videoRef.current.srcObject) {
+            requestAnimationFrame(processLoop);
+          }
+        };
+        requestAnimationFrame(processLoop);
       }
     } catch (err: any) {
       console.error('Webcam access error:', err);
-      setError('Failed to access camera.');
+      setError('Failed to access camera. Please allow camera permissions in browser.');
       setIsActive(false);
     }
   };

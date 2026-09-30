@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 import { AppView, BackendConnectionStatus, AccessibilitySettings, ISLClassInfo } from './types';
 import { Navigation } from './components/Navigation';
 import { DashboardView } from './components/DashboardView';
@@ -17,6 +19,32 @@ export default function App() {
   const [isBackendModalOpen, setIsBackendModalOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const [selectedPracticeSign, setSelectedPracticeSign] = useState<ISLClassInfo | null>(ISL_CLASSES[0]);
+  const lenisRef = useRef<Lenis | null>(null);
+
+  // Initialize Lenis Smooth Scrolling
+  useEffect(() => {
+    const lenis = new Lenis({
+      autoRaf: true,
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    lenisRef.current = lenis;
+
+    return () => {
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
+  // Scroll to top on tab / view change
+  useEffect(() => {
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [currentView]);
 
   // Accessibility state with dark mode persistence
   const [accessibility, setAccessibility] = useState<AccessibilitySettings>(() => {
