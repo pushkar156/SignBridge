@@ -248,7 +248,10 @@ export const LiveCommunicatorView: React.FC<LiveCommunicatorViewProps> = ({
         </div>
 
         {/* Right Column: Independently Scrollable Prediction, Sequence, & AI Cards (5 Cols on desktop) */}
-        <div className="lg:col-span-5 space-y-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar">
+        <div 
+          data-lenis-prevent
+          className="lg:col-span-5 space-y-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar"
+        >
           {/* Prediction Result & Confidence Card */}
           <PredictionCard
             prediction={prediction}

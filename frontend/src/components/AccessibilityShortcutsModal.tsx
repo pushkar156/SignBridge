@@ -24,12 +24,16 @@ export const AccessibilityShortcutsModal: React.FC<AccessibilityShortcutsModalPr
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+      data-lenis-prevent
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white dark:bg-[#1A241F] rounded-2xl max-w-md w-full shadow-2xl border border-stone-200 dark:border-[#283830] p-6 animate-in fade-in zoom-in-95">
+      <div 
+        data-lenis-prevent
+        className="bg-white dark:bg-[#1A241F] rounded-2xl max-w-md w-full shadow-2xl border border-stone-200 dark:border-[#283830] p-6 animate-in fade-in zoom-in-95"
+      >
         <div className="flex items-center justify-between border-b border-stone-100 dark:border-[#283830] pb-3 mb-4">
           <div className="flex items-center gap-2 text-stone-900 dark:text-[#F0F5F2] font-bold">
             <Keyboard className="w-5 h-5 text-[#2F6B57] dark:text-[#4ADE80]" />

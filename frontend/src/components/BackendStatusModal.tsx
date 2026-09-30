@@ -106,6 +106,7 @@ if __name__ == '__main__':
   return (
     <div 
       id="backend-status-modal-backdrop"
+      data-lenis-prevent
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -113,6 +114,7 @@ if __name__ == '__main__':
     >
       <div 
         id="backend-status-modal"
+        data-lenis-prevent
         className="bg-white dark:bg-[#19221D] rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200 dark:border-[#283830] animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}

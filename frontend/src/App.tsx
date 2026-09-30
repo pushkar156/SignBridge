@@ -25,9 +25,21 @@ export default function App() {
   useEffect(() => {
     const lenis = new Lenis({
       autoRaf: true,
-      duration: 1.2,
+      duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
+      allowNestedScroll: true,
+      prevent: (node) => {
+        // Allow native internal scrolling for nested scroll containers and modals
+        return (
+          node.hasAttribute('data-lenis-prevent') ||
+          node.classList?.contains('overflow-y-auto') ||
+          node.classList?.contains('overflow-x-auto') ||
+          node.classList?.contains('overflow-auto') ||
+          node.classList?.contains('custom-scrollbar') ||
+          Boolean(node.closest?.('[data-lenis-prevent], .overflow-y-auto, .overflow-x-auto, .overflow-auto, [role="dialog"], .modal'))
+        );
+      },
     });
     lenisRef.current = lenis;
 
